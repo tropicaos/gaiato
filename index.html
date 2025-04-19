@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desktop</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div id="desktop">
+        <div class="icon" data-id="benji" onclick="openWindow('text-engine')">
+            <img src="assets/icons/plushbear.ico" alt="BENJI Icon">
+            <span>BENJI</span>
+        </div>
+        <div class="icon" data-id="poligonal">
+            <img src="assets/icons/poligonal.ico" alt="Poligonal Icon">
+            <span>Poligonal</span>
+        </div>
+        <div class="icon" data-id="gaiato">
+            <img src="assets/icons/gaiato.ico" alt="Gaiato Icon">
+            <span>Gaiato</span>
+        </div>
+    </div>
+    <div id="taskbar">
+        <div id="start-button">
+            <img src="assets/icons/windows.ico" alt="Start">
+            <span>Iniciar</span>
+        </div>
+        <div id="start-menu" style="display: none; position: absolute; bottom: 40px; left: 0;">
+            <div class="menu-item" onclick="openWindow('text-engine')">BENJI</div>
+            <div class="menu-item">Programas</div>
+            <div class="menu-item">Documentos</div>
+            <div class="menu-item">Configurações</div>
+            <div class="menu-item">Ajuda</div>
+            <div class="menu-item">Desligar</div>
+        </div>
+        <div id="clock">00:00:00</div>
+    </div>
+    <script src="scripts/appConfig.js"></script>
+    <script src="scripts/windows.js"></script>
+    <script src="scripts/taskbar.js"></script>
+    <script src="scripts/desktop.js"></script>
+</body>
+</html>
