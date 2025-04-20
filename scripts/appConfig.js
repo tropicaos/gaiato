@@ -1,22 +1,55 @@
+/* TABLE OF CONTENTS
+    1. Application Configuration
+*/
+
+// 1. Application Configuration
 window.appConfig = {
-    'text-engine': {
-        allowMultipleInstances: false,
+    'benji': {
+        title: 'BENJI',
         icon: 'assets/icons/plushbear.ico',
-        title: 'BENJI'
+        allowMultipleInstances: false,
+        resizable: true
     },
     'poligonal': {
-        allowMultipleInstances: false,
+        title: 'Poligonal',
         icon: 'assets/icons/poligonal.ico',
-        title: 'Poligonal'
+        allowMultipleInstances: false,
+        resizable: false
     },
     'gaiato': {
-        allowMultipleInstances: false,
+        title: 'Gaiato',
         icon: 'assets/icons/gaiato.ico',
-        title: 'Gaiato'
+        allowMultipleInstances: false,
+        resizable: false
     },
     'notepad': {
-        allowMultipleInstances: true,
+        title: 'Bloquinho',
         icon: 'assets/icons/notepad.ico',
-        title: 'Notepad'
+        allowMultipleInstances: true,
+        resizable: true
+    },
+    'pinto': {
+        title: 'Pinto',
+        icon: 'assets/icons/paint.ico',
+        allowMultipleInstances: false,
+        resizable: true
+    },
+    'system-properties': {
+        title: 'Configurações',
+        icon: 'assets/icons/configs.ico',
+        allowMultipleInstances: false,
+        resizable: true
+    },
+    'help': {
+        title: 'Ajuda',
+        icon: 'assets/icons/ajuda.ico',
+        allowMultipleInstances: false,
+        resizable: true
+    },
+    'shutdown': {
+        title: 'Desligar',
+        icon: 'assets/icons/desligar.ico',
+        allowMultipleInstances: false,
+        resizable: true
     }
 };

@@ -1,146 +1,235 @@
+/* TABLE OF CONTENTS
+    1. Taskbar Initialization
+    2. Clock Management
+    3. Start Menu Management
+    4. Taskbar Icons
+*/
+
 function initializeTaskbar() {
     const startButton = document.getElementById('start-button');
     const startMenu = document.getElementById('start-menu');
     const clock = document.getElementById('clock');
+    const taskbarIcons = document.createElement('div');
+    taskbarIcons.id = 'taskbar-icons';
+    taskbarIcons.style.display = 'flex';
+    taskbarIcons.style.gap = '4px';
+    taskbarIcons.style.marginLeft = '10px';
+    taskbarIcons.style.flexGrow = '1';
+    document.getElementById('taskbar').insertBefore(taskbarIcons, clock);
 
+    // 2. Clock Management
     function updateClock() {
         const now = new Date();
         clock.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        console.log('[taskbar] Relógio atualizado');
     }
     updateClock();
     setInterval(updateClock, 1000);
 
-    startButton.addEventListener('click', () => {
+    // 3. Start Menu Management
+    startButton.addEventListener('click', (e) => {
+        e.stopPropagation();
         startMenu.style.display = startMenu.style.display === 'block' ? 'none' : 'block';
-        startMenu.style.position = 'absolute';
-        startMenu.style.bottom = '40px';
-        startMenu.style.left = '0';
+        startMenu.style.zIndex = '1002';
     });
 
     document.addEventListener('click', (e) => {
         if (!startButton.contains(e.target) && !startMenu.contains(e.target)) {
             startMenu.style.display = 'none';
+            document.querySelectorAll('.submenu').forEach(submenu => submenu.style.display = 'none');
         }
     });
 
-    // Limpar menu existente
     startMenu.innerHTML = '';
 
-    // Criar item Programas
+    // Menu Principal
     const programsItem = document.createElement('div');
     programsItem.className = 'menu-item';
     programsItem.textContent = 'Programas';
     programsItem.style.padding = '5px 10px';
-    programsItem.style.cursor = 'default';
 
     const programsSubmenu = document.createElement('div');
     programsSubmenu.className = 'submenu';
     programsSubmenu.style.display = 'none';
     programsSubmenu.style.position = 'absolute';
-    programsSubmenu.style.bottom = '100%';
-    programsSubmenu.style.left = '0';
+    programsSubmenu.style.left = '200px';
+    programsSubmenu.style.top = '0';
     programsSubmenu.style.background = '#c0c0c0';
     programsSubmenu.style.border = '2px solid #808080';
-    programsSubmenu.style.borderTop = '2px solid #ffffff';
-    programsSubmenu.style.borderLeft = '2px solid #ffffff';
-    programsSubmenu.style.boxShadow = '5px 5px 10px rgba(0, 0, 0, 0.2)';
-    programsSubmenu.style.zIndex = '1002';
+    programsSubmenu.style.borderTopColor = '#ffffff';
+    programsSubmenu.style.borderLeftColor = '#ffffff';
 
-    const apps = ['text-engine', 'poligonal', 'gaiato'];
-    apps.forEach(appName => {
-        const appSettings = window.appConfig[appName] || { title: appName, icon: 'assets/icons/plushbear.ico' };
+    const apps = [
+        { id: 'benji', title: 'BENJI', icon: 'assets/icons/plushbear.ico', action: () => openWindow('benji') },
+        { id: 'poligonal', title: 'Poligonal', icon: 'assets/icons/poligonal.ico', action: () => console.log('[taskbar] Poligonal é um placeholder') },
+        { id: 'gaiato', title: 'Gaiato', icon: 'assets/icons/gaiato.ico', action: () => console.log('[taskbar] Gaiato é um placeholder') }
+    ];
+
+    apps.forEach(app => {
         const appItem = document.createElement('div');
         appItem.className = 'menu-item';
         appItem.style.display = 'flex';
         appItem.style.alignItems = 'center';
         appItem.style.padding = '5px 10px';
-
         const appIcon = document.createElement('img');
-        appIcon.src = appSettings.icon;
+        appIcon.src = app.icon;
         appIcon.style.width = '16px';
         appIcon.style.height = '16px';
         appIcon.style.marginRight = '5px';
         appItem.appendChild(appIcon);
-
-        const appText = document.createElement('span');
-        appText.textContent = appSettings.title || appName;
-        appItem.appendChild(appText);
-
+        appItem.appendChild(document.createTextNode(app.title));
         appItem.addEventListener('click', () => {
-            openWindow(appName);
+            console.log(`[taskbar] Clicado em ${app.id}`);
+            const windowId = app.action();
+            if (windowId) addTaskbarIcon(windowId, app.id, window.appConfig[app.id]);
             startMenu.style.display = 'none';
             programsSubmenu.style.display = 'none';
         });
-
         programsSubmenu.appendChild(appItem);
     });
 
-    programsItem.addEventListener('click', () => {
-        programsSubmenu.style.display = programsSubmenu.style.display === 'block' ? 'none' : 'block';
+    programsItem.addEventListener('mouseenter', () => {
+        programsSubmenu.style.display = 'block';
     });
 
-    startMenu.appendChild(programsItem);
-    startMenu.appendChild(programsSubmenu);
+    programsSubmenu.addEventListener('mouseleave', () => {
+        programsSubmenu.style.display = 'none';
+    });
 
-    // Criar item Acessórios
     const accessoriesItem = document.createElement('div');
     accessoriesItem.className = 'menu-item';
     accessoriesItem.textContent = 'Acessórios';
     accessoriesItem.style.padding = '5px 10px';
-    accessoriesItem.style.cursor = 'default';
 
     const accessoriesSubmenu = document.createElement('div');
     accessoriesSubmenu.className = 'submenu';
     accessoriesSubmenu.style.display = 'none';
     accessoriesSubmenu.style.position = 'absolute';
-    accessoriesSubmenu.style.bottom = '100%';
-    accessoriesSubmenu.style.left = '0';
+    accessoriesSubmenu.style.left = '200px';
+    accessoriesSubmenu.style.top = '40px';
     accessoriesSubmenu.style.background = '#c0c0c0';
     accessoriesSubmenu.style.border = '2px solid #808080';
-    accessoriesSubmenu.style.borderTop = '2px solid #ffffff';
-    accessoriesSubmenu.style.borderLeft = '2px solid #ffffff';
-    accessoriesSubmenu.style.boxShadow = '5px 5px 10px rgba(0, 0, 0, 0.2)';
-    accessoriesSubmenu.style.zIndex = '1002';
+    accessoriesSubmenu.style.borderTopColor = '#ffffff';
+    accessoriesSubmenu.style.borderLeftColor = '#ffffff';
 
-    const notepadItem = document.createElement('div');
-    notepadItem.className = 'menu-item';
-    notepadItem.style.display = 'flex';
-    notepadItem.style.alignItems = 'center';
-    notepadItem.style.padding = '5px 10px';
+    const accessoriesApps = [
+        { id: 'notepad', title: 'Bloquinho', icon: 'assets/icons/notepad.ico', action: () => openWindow('notepad') },
+        { id: 'pinto', title: 'Pinto', icon: 'assets/icons/paint.ico', action: () => console.log('[taskbar] Pinto é um placeholder') }
+    ];
 
-    const notepadIcon = document.createElement('img');
-    notepadIcon.src = 'assets/icons/notepad.ico';
-    notepadIcon.style.width = '16px';
-    notepadIcon.style.height = '16px';
-    notepadIcon.style.marginRight = '5px';
-    notepadItem.appendChild(notepadIcon);
+    accessoriesApps.forEach(app => {
+        const appItem = document.createElement('div');
+        appItem.className = 'menu-item';
+        appItem.style.display = 'flex';
+        appItem.style.alignItems = 'center';
+        appItem.style.padding = '5px 10px';
+        const appIcon = document.createElement('img');
+        appIcon.src = app.icon;
+        appIcon.style.width = '16px';
+        appIcon.style.height = '16px';
+        appIcon.style.marginRight = '5px';
+        appItem.appendChild(appIcon);
+        appItem.appendChild(document.createTextNode(app.title));
+        appItem.addEventListener('click', () => {
+            console.log(`[taskbar] Clicado em ${app.id}`);
+            const windowId = app.action();
+            if (windowId) addTaskbarIcon(windowId, app.id, window.appConfig[app.id]);
+            startMenu.style.display = 'none';
+            accessoriesSubmenu.style.display = 'none';
+        });
+        accessoriesSubmenu.appendChild(appItem);
+    });
 
-    const notepadText = document.createElement('span');
-    notepadText.textContent = 'Notepad';
-    notepadItem.appendChild(notepadText);
+    accessoriesItem.addEventListener('mouseenter', () => {
+        accessoriesSubmenu.style.display = 'block';
+    });
 
-    notepadItem.addEventListener('click', () => {
-        openWindow('notepad');
-        startMenu.style.display = 'none';
+    accessoriesSubmenu.addEventListener('mouseleave', () => {
         accessoriesSubmenu.style.display = 'none';
     });
 
-    accessoriesSubmenu.appendChild(notepadItem);
-
-    accessoriesItem.addEventListener('click', () => {
-        accessoriesSubmenu.style.display = accessoriesSubmenu.style.display === 'block' ? 'none' : 'block';
+    const settingsItem = document.createElement('div');
+    settingsItem.className = 'menu-item';
+    settingsItem.textContent = 'Configurações';
+    settingsItem.style.padding = '5px 10px';
+    settingsItem.addEventListener('click', () => {
+        console.log('[taskbar] Abrindo Configurações');
+        const windowId = openWindow('system-properties');
+        if (windowId) addTaskbarIcon(windowId, 'system-properties', window.appConfig['system-properties']);
+        startMenu.style.display = 'none';
     });
 
+    const helpItem = document.createElement('div');
+    helpItem.className = 'menu-item';
+    helpItem.textContent = 'Ajuda';
+    helpItem.style.padding = '5px 10px';
+    helpItem.addEventListener('click', () => {
+        console.log('[taskbar] Abrindo Ajuda');
+        const windowId = openWindow('help');
+        if (windowId) addTaskbarIcon(windowId, 'help', window.appConfig['help']);
+        startMenu.style.display = 'none';
+    });
+
+    const shutdownItem = document.createElement('div');
+    shutdownItem.className = 'menu-item';
+    shutdownItem.textContent = 'Desligar';
+    shutdownItem.style.padding = '5px 10px';
+    shutdownItem.addEventListener('click', () => {
+        console.log('[taskbar] Abrindo Desligar');
+        const windowId = openWindow('shutdown');
+        if (windowId) addTaskbarIcon(windowId, 'shutdown', window.appConfig['shutdown']);
+        startMenu.style.display = 'none';
+    });
+
+    startMenu.appendChild(programsItem);
+    startMenu.appendChild(programsSubmenu);
     startMenu.appendChild(accessoriesItem);
     startMenu.appendChild(accessoriesSubmenu);
+    startMenu.appendChild(settingsItem);
+    startMenu.appendChild(helpItem);
+    startMenu.appendChild(shutdownItem);
 
-    // Fechar submenus ao clicar fora
-    document.addEventListener('click', (e) => {
-        if (!programsItem.contains(e.target) && !programsSubmenu.contains(e.target)) {
-            programsSubmenu.style.display = 'none';
-        }
-        if (!accessoriesItem.contains(e.target) && !accessoriesSubmenu.contains(e.target)) {
-            accessoriesSubmenu.style.display = 'none';
-        }
-    });
+    // 4. Taskbar Icons
+    window.addTaskbarIcon = function(windowId, appName, appSettings) {
+        const taskIcon = document.createElement('div');
+        taskIcon.className = 'task-icon';
+        taskIcon.style.display = 'flex';
+        taskIcon.style.alignItems = 'center';
+        taskIcon.style.padding = '2px 8px';
+        taskIcon.style.background = '#c0c0c0';
+        taskIcon.style.border = '1px solid #808080';
+        taskIcon.style.borderTopColor = '#ffffff';
+        taskIcon.style.borderLeftColor = '#ffffff';
+        taskIcon.style.cursor = 'pointer';
+
+        const iconImg = document.createElement('img');
+        iconImg.src = appSettings.icon;
+        iconImg.style.width = '16px';
+        iconImg.style.height = '16px';
+        iconImg.style.marginRight = '5px';
+        taskIcon.appendChild(iconImg);
+
+        const iconText = document.createElement('span');
+        iconText.textContent = appSettings.title || appName;
+        taskIcon.appendChild(iconText);
+
+        taskIcon.addEventListener('click', () => {
+            const win = windowManager.windows[windowId];
+            if (win) {
+                if (win.windowDiv.style.display === 'none') {
+                    console.log(`[taskbar] Restaurando ${appName}`);
+                    win.windowDiv.style.display = 'block';
+                    win.windowDiv.style.zIndex = windowManager.zIndex++;
+                    taskIcon.classList.remove('minimized');
+                } else {
+                    console.log(`[taskbar] Minimizando ${appName}`);
+                    win.windowDiv.style.display = 'none';
+                    taskIcon.classList.add('minimized');
+                }
+            }
+        });
+
+        taskbarIcons.appendChild(taskIcon);
+        windowManager.windows[windowId].taskIcon = taskIcon;
+    };
 }
