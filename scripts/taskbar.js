@@ -31,6 +31,7 @@ function initializeTaskbar() {
         e.stopPropagation();
         startMenu.style.display = startMenu.style.display === 'block' ? 'none' : 'block';
         startMenu.style.zIndex = '1002';
+        document.querySelectorAll('.submenu').forEach(submenu => submenu.style.display = 'none');
     });
 
     document.addEventListener('click', (e) => {
@@ -52,12 +53,13 @@ function initializeTaskbar() {
     programsSubmenu.className = 'submenu';
     programsSubmenu.style.display = 'none';
     programsSubmenu.style.position = 'absolute';
-    programsSubmenu.style.left = '200px';
+    programsSubmenu.style.left = '202px';
     programsSubmenu.style.top = '0';
     programsSubmenu.style.background = '#c0c0c0';
     programsSubmenu.style.border = '2px solid #808080';
     programsSubmenu.style.borderTopColor = '#ffffff';
     programsSubmenu.style.borderLeftColor = '#ffffff';
+    programsSubmenu.style.zIndex = '1003';
 
     const apps = [
         { id: 'benji', title: 'BENJI', icon: 'assets/icons/plushbear.ico', action: () => openWindow('benji') },
@@ -81,7 +83,7 @@ function initializeTaskbar() {
         appItem.addEventListener('click', () => {
             console.log(`[taskbar] Clicado em ${app.id}`);
             const windowId = app.action();
-            if (windowId) addTaskbarIcon(windowId, app.id, window.appConfig[app.id]);
+            if (windowId) window.addTaskbarIcon(windowId, app.id, window.appConfig[app.id]);
             startMenu.style.display = 'none';
             programsSubmenu.style.display = 'none';
         });
@@ -89,7 +91,14 @@ function initializeTaskbar() {
     });
 
     programsItem.addEventListener('mouseenter', () => {
+        document.querySelectorAll('.submenu').forEach(submenu => submenu.style.display = 'none');
         programsSubmenu.style.display = 'block';
+    });
+
+    programsItem.addEventListener('mouseleave', (e) => {
+        if (!programsSubmenu.contains(e.relatedTarget)) {
+            programsSubmenu.style.display = 'none';
+        }
     });
 
     programsSubmenu.addEventListener('mouseleave', () => {
@@ -105,12 +114,13 @@ function initializeTaskbar() {
     accessoriesSubmenu.className = 'submenu';
     accessoriesSubmenu.style.display = 'none';
     accessoriesSubmenu.style.position = 'absolute';
-    accessoriesSubmenu.style.left = '200px';
+    accessoriesSubmenu.style.left = '202px';
     accessoriesSubmenu.style.top = '40px';
     accessoriesSubmenu.style.background = '#c0c0c0';
     accessoriesSubmenu.style.border = '2px solid #808080';
     accessoriesSubmenu.style.borderTopColor = '#ffffff';
     accessoriesSubmenu.style.borderLeftColor = '#ffffff';
+    accessoriesSubmenu.style.zIndex = '1003';
 
     const accessoriesApps = [
         { id: 'notepad', title: 'Bloquinho', icon: 'assets/icons/notepad.ico', action: () => openWindow('notepad') },
@@ -133,7 +143,7 @@ function initializeTaskbar() {
         appItem.addEventListener('click', () => {
             console.log(`[taskbar] Clicado em ${app.id}`);
             const windowId = app.action();
-            if (windowId) addTaskbarIcon(windowId, app.id, window.appConfig[app.id]);
+            if (windowId) window.addTaskbarIcon(windowId, app.id, window.appConfig[app.id]);
             startMenu.style.display = 'none';
             accessoriesSubmenu.style.display = 'none';
         });
@@ -141,7 +151,14 @@ function initializeTaskbar() {
     });
 
     accessoriesItem.addEventListener('mouseenter', () => {
+        document.querySelectorAll('.submenu').forEach(submenu => submenu.style.display = 'none');
         accessoriesSubmenu.style.display = 'block';
+    });
+
+    accessoriesItem.addEventListener('mouseleave', (e) => {
+        if (!accessoriesSubmenu.contains(e.relatedTarget)) {
+            accessoriesSubmenu.style.display = 'none';
+        }
     });
 
     accessoriesSubmenu.addEventListener('mouseleave', () => {
@@ -155,7 +172,7 @@ function initializeTaskbar() {
     settingsItem.addEventListener('click', () => {
         console.log('[taskbar] Abrindo Configurações');
         const windowId = openWindow('system-properties');
-        if (windowId) addTaskbarIcon(windowId, 'system-properties', window.appConfig['system-properties']);
+        if (windowId) window.addTaskbarIcon(windowId, 'system-properties', window.appConfig['system-properties']);
         startMenu.style.display = 'none';
     });
 
@@ -166,7 +183,7 @@ function initializeTaskbar() {
     helpItem.addEventListener('click', () => {
         console.log('[taskbar] Abrindo Ajuda');
         const windowId = openWindow('help');
-        if (windowId) addTaskbarIcon(windowId, 'help', window.appConfig['help']);
+        if (windowId) window.addTaskbarIcon(windowId, 'help', window.appConfig['help']);
         startMenu.style.display = 'none';
     });
 
@@ -177,7 +194,7 @@ function initializeTaskbar() {
     shutdownItem.addEventListener('click', () => {
         console.log('[taskbar] Abrindo Desligar');
         const windowId = openWindow('shutdown');
-        if (windowId) addTaskbarIcon(windowId, 'shutdown', window.appConfig['shutdown']);
+        if (windowId) window.addTaskbarIcon(windowId, 'shutdown', window.appConfig['shutdown']);
         startMenu.style.display = 'none';
     });
 

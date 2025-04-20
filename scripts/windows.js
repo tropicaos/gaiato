@@ -269,14 +269,13 @@ function openWindow(appName) {
 
     close.addEventListener('click', () => {
         console.log(`[window] Fechando ${windowId}`);
-        document.getElementById('desktop').removeChild(windowDiv);
         if (windowManager.windows[windowId]?.taskIcon) {
             windowManager.windows[windowId].taskIcon.remove();
         }
+        document.getElementById('desktop').removeChild(windowDiv);
         delete windowManager.windows[windowId];
     });
 
-    const windowIdReturned = windowId;
-    addTaskbarIcon(windowId, appName, appSettings);
-    return windowIdReturned;
+    window.addTaskbarIcon(windowId, appName, appSettings);
+    return windowId;
 }

@@ -153,15 +153,38 @@ body {
 #title-buttons span {
   color: #000000;
   background: #c0c0c0;
-  border: 1px solid #808080;
+  border: 2px solid;
   border-top-color: #ffffff;
   border-left-color: #ffffff;
-  padding: 2px 8px;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  padding: 0 6px;
+  font-size: 12px;
+  line-height: 14px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 14px;
+  box-sizing: border-box;
 }
 
 #title-buttons span:hover {
-  background: #808080;
+  border-top-color: #808080;
+  border-left-color: #808080;
+  border-right-color: #ffffff;
+  border-bottom-color: #ffffff;
+  background: #e0e0e0;
+}
+
+#title-buttons span:active {
+  border-top-color: #808080;
+  border-left-color: #808080;
+  border-right-color: #ffffff;
+  border-bottom-color: #ffffff;
+  background: #c0c0c0;
+  padding: 1px 5px 0 7px;
 }
 
 .content {
@@ -191,6 +214,7 @@ body {
   border-left-color: #ffffff;
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
   display: none;
+  z-index: 1002;
 }
 
 .menu-item {
@@ -208,54 +232,5 @@ body {
   border: 2px solid #808080;
   border-top-color: #ffffff;
   border-left-color: #ffffff;
-}
-
-/* 6. Icons */
-.icon {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  cursor: pointer;
-  width: 80px;
-  height: 80px;
-  visibility: visible;
-}
-
-.icon img {
-  width: 48px;
-  height: 48px;
-}
-
-.icon span {
-  color: #ffffff;
-  font-size: 12px;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-  margin-top: 5px;
-  word-wrap: break-word;
-}
-
-/* 7. Responsive */
-@media (max-width: 768px) {
-  #desktop {
-      grid-template-columns: repeat(auto-fill, 60px);
-      grid-template-rows: repeat(auto-fill, 60px);
-      gap: 5px;
-      padding: 5px;
-  }
-
-  .icon {
-      width: 60px;
-      height: 60px;
-  }
-
-  .icon img {
-      width: 32px;
-      height: 32px;
-  }
-
-  .icon span {
-      font-size: 10px;
-  }
+  z-index: 1003;
 }
