@@ -4,6 +4,7 @@
     3. Taskbar Styles
     4. Window Styles
     5. Start Menu Styles
+    6. Control Buttons
 */
 
 /* 1. Global Styles */
@@ -74,6 +75,7 @@ body {
   border-top-color: #ffffff;
   border-left-color: #ffffff;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 #start-button img {
@@ -87,10 +89,18 @@ body {
   gap: 4px;
   margin-left: 10px;
   flex-grow: 1;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+#taskbar-icons::-webkit-scrollbar {
+  display: none;
 }
 
 .task-icon {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   padding: 2px 8px;
   background: #c0c0c0;
@@ -98,6 +108,7 @@ body {
   border-top-color: #ffffff;
   border-left-color: #ffffff;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .task-icon:hover {
@@ -115,6 +126,7 @@ body {
   border: 2px solid #808080;
   border-top-color: #ffffff;
   border-left-color: #ffffff;
+  flex-shrink: 0;
 }
 
 /* 4. Window Styles */
@@ -150,6 +162,61 @@ body {
   margin-right: 2px;
 }
 
+/* 5. Start Menu Styles */
+#start-menu {
+  position: absolute;
+  bottom: 34px;
+  left: 0;
+  width: 250px;
+  background: #c0c0c0;
+  border: 2px solid #808080;
+  border-top-color: #ffffff;
+  border-left-color: #ffffff;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
+  display: none;
+  z-index: 1002;
+  display: flex;
+}
+
+.menu-sidebar {
+  width: 50px;
+  background: #808080;
+  color: #ffffff;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.menu-items-container {
+  flex-grow: 1;
+}
+
+.menu-item {
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+}
+
+.menu-item:hover {
+  background: #000080;
+  color: #ffffff;
+}
+
+.submenu {
+  width: 200px;
+  background: #c0c0c0;
+  border: 2px solid #808080;
+  border-top-color: #ffffff;
+  border-left-color: #ffffff;
+  z-index: 1003;
+}
+
+/* 6. Control Buttons */
 #title-buttons span {
   color: #000000;
   background: #c0c0c0;
@@ -187,50 +254,17 @@ body {
   padding: 1px 5px 0 7px;
 }
 
-.content {
-  width: 100%;
-  height: calc(100% - 24px);
-  background: #ffffff;
-}
-
-.resizer {
-  width: 10px;
-  height: 10px;
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  cursor: se-resize;
-}
-
-/* 5. Start Menu Styles */
-#start-menu {
-  position: absolute;
-  bottom: 34px;
-  left: 0;
-  width: 200px;
-  background: #c0c0c0;
-  border: 2px solid #808080;
-  border-top-color: #ffffff;
-  border-left-color: #ffffff;
-  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
-  display: none;
-  z-index: 1002;
-}
-
-.menu-item {
-  padding: 5px 10px;
-}
-
-.menu-item:hover {
-  background: #000080;
-  color: #ffffff;
-}
-
-.submenu {
-  width: 200px;
-  background: #c0c0c0;
-  border: 2px solid #808080;
-  border-top-color: #ffffff;
-  border-left-color: #ffffff;
-  z-index: 1003;
+/* Media Queries for Mobile */
+@media (max-width: 768px) {
+  #taskbar {
+      height: 32px;
+      width: 100%;
+  }
+  #taskbar-icons {
+      flex-grow: 1;
+      overflow-x: auto;
+  }
+  #start-button, #clock {
+      flex-shrink: 0;
+  }
 }
