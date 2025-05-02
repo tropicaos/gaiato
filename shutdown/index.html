@@ -3,90 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desligar o Sistema</title>
+    <title>Desligando Gaiat.OS</title>
     <style>
         body {
             margin: 0;
-            padding: 20px;
+            background: #000;
+            color: #ff8c00;
             font-family: 'MS Sans Serif', Arial, sans-serif;
-            background: #c0c0c0;
-        }
-        .container {
-            background: #ffffff;
-            border: 2px solid;
-            border-top-color: #808080;
-            border-left-color: #808080;
-            border-right-color: #ffffff;
-            border-bottom-color: #ffffff;
-            padding: 20px;
-            text-align: center;
-        }
-        .buttons {
-            margin-top: 20px;
             display: flex;
+            align-items: center;
             justify-content: center;
-            gap: 10px;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
         }
-        .button {
-            padding: 5px 20px;
-            background: #c0c0c0;
-            border: 2px solid;
-            border-top-color: #ffffff;
-            border-left-color: #ffffff;
-            border-right-color: #808080;
-            border-bottom-color: #808080;
-            cursor: pointer;
+        .shutdown-container {
+            text-align: center;
+            opacity: 0;
+            animation: fadeIn 2s forwards;
         }
-        .button:active {
-            border-top-color: #808080;
-            border-left-color: #808080;
-            border-right-color: #ffffff;
-            border-bottom-color: #ffffff;
+        .shutdown-text {
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <p>Tem certeza que deseja desligar o Gaiat.OS?</p>
-        <div class="buttons">
-            <div class="button" id="confirm">Sim</div>
-            <div class="button" id="cancel">Não</div>
-        </div>
+    <div class="shutdown-container">
+        <div class="shutdown-text">Seu computador já pode ser desligado com segurança.</div>
     </div>
     <script>
-        document.getElementById('cancel').addEventListener('click', () => {
-            window.parent.postMessage('close-window', '*');
-        });
-
-        document.getElementById('confirm').addEventListener('click', () => {
-            const shutdownScreen = document.createElement('div');
-            shutdownScreen.style.position = 'fixed';
-            shutdownScreen.style.top = '0';
-            shutdownScreen.style.left = '0';
-            shutdownScreen.style.width = '100%';
-            shutdownScreen.style.height = '100%';
-            shutdownScreen.style.background = '#000000';
-            shutdownScreen.style.display = 'flex';
-            shutdownScreen.style.alignItems = 'center';
-            shutdownScreen.style.justifyContent = 'center';
-            shutdownScreen.style.color = '#ff8c00';
-            shutdownScreen.style.fontSize = '48px';
-            shutdownScreen.style.fontFamily = 'MS Sans Serif, Arial, sans-serif';
-            shutdownScreen.style.textAlign = 'center';
-            shutdownScreen.style.zIndex = '9999';
-            shutdownScreen.textContent = 'Seu computador já pode ser desligado com segurança';
-
-            document.body.innerHTML = '';
-            document.body.appendChild(shutdownScreen);
-
+        setTimeout(() => {
+            document.querySelector('.shutdown-container').style.animation = 'fadeOut 2s forwards';
             setTimeout(() => {
-                shutdownScreen.style.opacity = '0';
-                shutdownScreen.style.transition = 'opacity 2s';
-                setTimeout(() => {
-                    window.location.href = 'https://bezerramos.cc';
-                }, 2000);
-            }, 3000);
-        });
+                window.location.href = 'https://bezerramos.cc';
+            }, 2000);
+        }, 5000);
     </script>
 </body>
 </html>

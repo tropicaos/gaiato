@@ -1,8 +1,8 @@
 /* TABLE OF CONTENTS
-    1. Application Configuration
+    1. Application Configuration Object (window.appConfig)
 */
 
-// 1. Application Configuration
+// 1. Application Configuration Object (window.appConfig)
 window.appConfig = {
     'benji': {
         title: 'BENJI',
@@ -13,13 +13,13 @@ window.appConfig = {
     'poligonal': {
         title: 'Poligonal',
         icon: 'assets/icons/poligonal.ico',
-        allowMultipleInstances: false,
+        allowMultipleInstances: false, // Placeholder App
         resizable: false
     },
     'gaiato': {
         title: 'Gaiato',
         icon: 'assets/icons/gaiato.ico',
-        allowMultipleInstances: false,
+        allowMultipleInstances: false, // Placeholder App
         resizable: false
     },
     'notepad': {
@@ -29,7 +29,7 @@ window.appConfig = {
         resizable: true
     },
     'pinto': {
-        title: 'Pinto',
+        title: 'Pinto', // Placeholder App (Paint?)
         icon: 'assets/icons/paint.ico',
         allowMultipleInstances: false,
         resizable: true
@@ -50,6 +50,7 @@ window.appConfig = {
         title: 'Desligar',
         icon: 'assets/icons/desligar.ico',
         allowMultipleInstances: false,
-        resizable: true
+        resizable: false
     }
+    // Futuros apps podem ser adicionados aqui
 };

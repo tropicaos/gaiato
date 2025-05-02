@@ -1,281 +1,234 @@
 /* TABLE OF CONTENTS
-    1. Window Manager
-    2. Window Creation
-    3. Event Handlers
+    1. Window Manager Object (windowManager)
+       - windows object store
+       - zIndex counter
+       - windowTypes definitions
+    2. Window Creation Function (openWindow)
+       - Criação de DOM, aplicação de classes 98.css
+       - Lógica de instância única e placeholders
+       - Criação de conteúdo (iframe ou direto)
+    3. Event Handlers & Logic (dentro de openWindow)
+       - Dragging, Resizing, Focusing
+       - Maximize/Restore, Minimize, Close Actions
+    4. Cleanup Logic (dentro do 'close' handler) - REVISADO
+    5. Global Helper/Integration (Chamada para addTaskbarIcon)
 */
 
-// 1. Window Manager
+/* 1. Window Manager Object */
 const windowManager = {
     windows: {},
     zIndex: 1000,
     windowTypes: {
         standard: {
-            createContent: (appName, contentDiv) => {
-                const appSettings = window.appConfig[appName] || {};
-                if (appName === 'notepad') {
-                    const iframe = document.createElement('iframe');
-                    iframe.src = 'notepad/index.html';
-                    iframe.style.width = '100%';
-                    iframe.style.height = '100%';
-                    iframe.style.border = 'none';
-                    contentDiv.appendChild(iframe);
-                } else if (appName === 'benji') {
-                    const iframe = document.createElement('iframe');
-                    iframe.src = 'text-engine/index.html';
-                    iframe.style.width = '100%';
-                    iframe.style.height = '100%';
-                    iframe.style.border = 'none';
-                    contentDiv.appendChild(iframe);
-                } else if (appName === 'shutdown') {
-                    const div = document.createElement('div');
-                    div.style.padding = '20px';
-                    div.textContent = 'Desligando o sistema...';
-                    contentDiv.appendChild(div);
-                } else {
-                    const placeholder = document.createElement('div');
-                    placeholder.textContent = `Aplicativo ${appName} não configurado`;
-                    placeholder.style.padding = '10px';
-                    contentDiv.appendChild(placeholder);
-                }
+            createContent: (appName, contentDiv, windowId) => {
+                const appSettings = window.appConfig[appName] || {}; let iframeSrc = null;
+                if (appName === 'notepad') iframeSrc = './notepad/index.html';
+                else if (appName === 'benji') iframeSrc = './text-engine/index.html';
+                // else if (appName === 'outroApp') iframeSrc = './outroApp/index.html'; // Adicionar outros
+                if (iframeSrc) {
+                    const iframe = document.createElement('iframe'); iframe.src = iframeSrc;
+                    iframe.style.width = '100%'; iframe.style.height = '100%'; iframe.style.border = 'none';
+                    iframe.setAttribute('frameborder', '0'); contentDiv.appendChild(iframe);
+                } else { contentDiv.innerHTML = `<p style="padding: 10px;">Conteúdo para '${appName}'.</p>`; }
             }
         },
-        settings: {
-            createContent: (appName, contentDiv) => {
-                const div = document.createElement('div');
-                div.style.padding = '20px';
-                div.innerHTML = `
-                    <h1>Configurações do Sistema</h1>
-                    <p>Sistema Operacional: Gaiat.OS</p>
-                    <p>Versão: 1.0.0</p>
-                    <p>Desenvolvido por: [Seu Nome]</p>
-                `;
-                contentDiv.appendChild(div);
-            }
-        },
-        help: {
-            createContent: (appName, contentDiv) => {
-                const div = document.createElement('div');
-                div.style.padding = '20px';
-                div.innerHTML = `
-                    <h1>Ajuda do Gaiat.OS</h1>
-                    <p>Bem-vindo à ajuda do Gaiat.OS. Em desenvolvimento.</p>
-                `;
-                contentDiv.appendChild(div);
-            }
-        }
+        settings: { createContent: (appName, contentDiv) => {
+                 contentDiv.innerHTML = `
+                     <h3 style="margin-top: 0;">Propriedades do Sistema</h3>
+                     <p>Sistema Operacional: Gaiat.OS</p><p>Versão: 0.1 Alpha</p>
+                     <p>Baseado em: 98.css</p><p style="margin-top: 15px;">Desenvolvido por: Poligonal</p>`;
+             }},
+        help: { createContent: (appName, contentDiv) => {
+                 contentDiv.innerHTML = `
+                     <h3 style="margin-top: 0;">Ajuda do Gaiat.OS</h3>
+                     <p>Bem-vindo ao sistema de ajuda.</p><p>Use o menu 'Agilizar' para acessar programas e acessórios.</p>
+                     <p>Clique e arraste a barra de título para mover janelas.</p>
+                     <p>Use os botões no canto superior direito para controlar as janelas.</p>
+                     <p><i>(Esta seção está em desenvolvimento)</i></p>`;
+             }},
+        message: { createContent: (appName, contentDiv, windowId) => {
+                 contentDiv.innerHTML = `<p style="margin-bottom: 20px; text-align: center;">Tem certeza que deseja desligar o sistema?</p><div style="display: flex; justify-content: center; gap: 10px;"><button id="shutdown-yes-${windowId}" class="button">Sim</button><button id="shutdown-no-${windowId}" class="button">Não</button></div>`;
+                 setTimeout(() => {
+                     const yesButton = contentDiv.querySelector(`#shutdown-yes-${windowId}`); const noButton = contentDiv.querySelector(`#shutdown-no-${windowId}`); const windowData = windowManager.windows[windowId];
+                     if (yesButton) { yesButton.addEventListener('click', () => { console.log('[window] Desligando...'); document.body.innerHTML = '<div style="color: white; background: black; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: monospace;">É seguro desligar o computador.</div>'; }); }
+                     if (noButton && windowData) { noButton.addEventListener('click', () => { windowData.windowDiv?.querySelector('.title-bar-controls button[aria-label="Close"]')?.click(); }); }
+                 }, 0);
+             }}
     }
 };
 
-// 2. Window Creation
-function openWindow(appName) {
-    console.log(`[openWindow] Tentando abrir ${appName}`);
-    const appSettings = window.appConfig[appName] || { title: appName, icon: 'assets/icons/notepad.ico' };
+/* 2. Window Creation Function */
+function openWindow(appName) { // Função global
+    if (!appName) { console.error("[window] Tentativa de abrir janela sem appName."); return null; }
+    console.log(`[window] Abrindo ${appName}`);
+    const appSettings = window.appConfig[appName] || { title: appName, icon: 'assets/icons/default.ico', allowMultipleInstances: true, resizable: true };
 
-    if (['poligonal', 'gaiato', 'pinto'].includes(appName)) {
-        console.log(`[openWindow] ${appName} é um placeholder`);
-        return null;
-    }
+    if (['poligonal', 'gaiato', 'pinto'].includes(appName)) { alert(`O aplicativo '${appSettings.title}' ainda é um placeholder.`); console.log(`[window] Bloqueado placeholder: ${appName}`); return null; }
 
-    if (!appSettings.allowMultipleInstances && Object.values(windowManager.windows).some(w => w.appName === appName)) {
-        console.log(`[openWindow] Instância única de ${appName} já aberta`);
-        return null;
-    }
+    const existingWindowId = Object.keys(windowManager.windows).find(id => windowManager.windows[id].appName === appName);
+    if (!appSettings.allowMultipleInstances && existingWindowId) { console.log(`[window] Focando instância única existente de ${appName}`); const eW = windowManager.windows[existingWindowId]; if (eW?.windowDiv) { eW.taskIcon?.click(); if (eW.windowDiv.style.display !== 'none') eW.windowDiv.style.zIndex = windowManager.zIndex++; } return existingWindowId; }
 
-    const windowId = `window-${Math.random().toString(36).substr(2, 9)}`;
-    const windowDiv = document.createElement('div');
-    windowDiv.className = 'window';
-    windowDiv.id = windowId;
-    windowDiv.style.position = 'absolute';
-    windowDiv.style.left = '100px';
-    windowDiv.style.top = '100px';
-    windowDiv.style.width = '600px';
-    windowDiv.style.height = '450px';
-    windowDiv.style.zIndex = windowManager.zIndex++;
-    windowDiv.style.background = '#c0c0c0';
-    windowDiv.style.border = '2px solid #808080';
-    windowDiv.style.borderTopColor = '#ffffff';
-    windowDiv.style.borderLeftColor = '#ffffff';
+    // --- Criação DOM ---
+    const windowId = `window-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+    const windowDiv = document.createElement('div'); windowDiv.className = 'window'; windowDiv.id = windowId; windowDiv.style.position = 'absolute'; windowDiv.style.zIndex = windowManager.zIndex++;
+    const openWindowsCount = Object.keys(windowManager.windows).length; windowDiv.style.left = `${50 + (openWindowsCount % 10) * 20}px`; windowDiv.style.top = `${50 + (openWindowsCount % 10) * 20}px`;
+    windowDiv.style.width = appSettings.width || (appName === 'shutdown' ? '300px' : '600px'); windowDiv.style.height = appSettings.height || (appName === 'shutdown' ? '150px' : '450px');
+    windowDiv.style.minWidth = '150px'; windowDiv.style.minHeight = '100px';
 
-    const titleBar = document.createElement('div');
-    titleBar.className = 'title-bar';
-    titleBar.style.background = '#000080';
-    titleBar.style.color = '#ffffff';
-    titleBar.style.padding = '2px';
-    titleBar.style.display = 'flex';
-    titleBar.style.alignItems = 'center';
-    titleBar.style.cursor = 'move';
+    // Title Bar
+    const titleBar = document.createElement('div'); titleBar.className = 'title-bar'; titleBar.style.cursor = 'move';
+    const titleIcon = document.createElement('img'); titleIcon.src = appSettings.icon; titleIcon.style.width = '16px'; titleIcon.style.height = '16px'; titleIcon.style.marginRight = '3px'; titleIcon.ondragstart = () => false;
+    const titleTextDiv = document.createElement('div'); titleTextDiv.className = 'title-bar-text'; titleTextDiv.textContent = appSettings.title || appName;
+    const titleButtons = document.createElement('div'); titleButtons.className = 'title-bar-controls';
+    // Botões
+    const minimize = document.createElement('button'); minimize.className = 'button'; minimize.setAttribute('aria-label', 'Minimize');
+    const maximizeRestore = document.createElement('button'); maximizeRestore.className = 'button'; maximizeRestore.setAttribute('aria-label', 'Maximize');
+    const canResize = appSettings.resizable !== false && appName !== 'shutdown'; if (!canResize) maximizeRestore.disabled = true;
+    const close = document.createElement('button'); close.className = 'button'; close.setAttribute('aria-label', 'Close');
+    // Montagem Title Bar
+    titleButtons.appendChild(minimize); if (canResize) titleButtons.appendChild(maximizeRestore); titleButtons.appendChild(close);
+    titleBar.appendChild(titleIcon); titleBar.appendChild(titleTextDiv); titleBar.appendChild(titleButtons);
 
-    const titleIcon = document.createElement('img');
-    titleIcon.src = appSettings.icon;
-    titleIcon.style.width = '16px';
-    titleIcon.style.height = '16px';
-    titleIcon.style.marginRight = '5px';
+    // Content Area
+    const content = document.createElement('div'); content.className = 'window-body';
+    const updateContentHeight = () => { const tbH = titleBar.offsetHeight || 24; const wP = 6; content.style.height = `calc(100% - ${tbH}px - ${wP}px)`; };
+    updateContentHeight(); content.style.boxSizing = 'border-box'; content.style.overflow = 'auto';
 
-    const titleText = document.createElement('span');
-    titleText.textContent = appSettings.title || appName;
-    titleText.style.flexGrow = 1;
+    // Montagem Janela
+    windowDiv.appendChild(titleBar); windowDiv.appendChild(content);
 
-    const titleButtons = document.createElement('div');
-    titleButtons.id = 'title-buttons';
+    // Popula Conteúdo
+    const windowType = appName === 'system-properties' ? 'settings' : appName === 'help' ? 'help' : appName === 'shutdown' ? 'message' : 'standard';
+    windowManager.windowTypes[windowType].createContent(appName, content, windowId);
 
-    const minimize = document.createElement('span');
-    minimize.className = 'minimize';
-    minimize.textContent = '-';
-
-    const maximizeRestore = document.createElement('span');
-    maximizeRestore.className = 'maximize-restore';
-    maximizeRestore.textContent = '□';
-
-    const close = document.createElement('span');
-    close.className = 'close';
-    close.textContent = 'x';
-
-    titleButtons.appendChild(minimize);
-    titleButtons.appendChild(maximizeRestore);
-    titleButtons.appendChild(close);
-
-    titleBar.appendChild(titleIcon);
-    titleBar.appendChild(titleText);
-    titleBar.appendChild(titleButtons);
-    windowDiv.appendChild(titleBar);
-
-    const content = document.createElement('div');
-    content.className = 'content';
-    content.style.width = '100%';
-    content.style.height = 'calc(100% - 24px)';
-    content.style.background = '#ffffff';
-    windowDiv.appendChild(content);
-
-    const windowType = appName === 'system-properties' ? 'settings' : 
-                      appName === 'help' ? 'help' : 'standard';
-    windowManager.windowTypes[windowType].createContent(appName, content);
-
-    let isResizing = false;
-    let startX, startY, startWidth, startHeight;
-
-    if (appSettings.resizable) {
-        const resizer = document.createElement('div');
-        resizer.className = 'resizer';
-        resizer.style.width = '10px';
-        resizer.style.height = '10px';
-        resizer.style.position = 'absolute';
-        resizer.style.right = '0';
-        resizer.style.bottom = '0';
-        resizer.style.cursor = 'se-resize';
-        windowDiv.appendChild(resizer);
-
-        resizer.addEventListener('mousedown', (e) => {
-            isResizing = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            startWidth = parseInt(windowDiv.style.width, 10);
-            startHeight = parseInt(windowDiv.style.height, 10);
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (isResizing) {
-                const width = startWidth + (e.clientX - startX);
-                const height = startHeight + (e.clientY - startY);
-                windowDiv.style.width = `${width}px`;
-                windowDiv.style.height = `${height}px`;
-                windowManager.windows[windowId].originalDimensions = { width: `${width}px`, height: `${height}px` };
-                const iframe = content.querySelector('iframe');
-                if (iframe) {
-                    iframe.style.width = '100%';
-                    iframe.style.height = '100%';
-                    window.dispatchEvent(new Event('resize'));
-                }
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            isResizing = false;
-        });
-    }
-
+    // Adiciona ao DOM
     document.getElementById('desktop').appendChild(windowDiv);
 
-    windowManager.windows[windowId] = {
-        windowDiv,
-        appName,
-        isMaximized: false,
-        originalPosition: { left: '100px', top: '100px' },
-        originalDimensions: { width: '600px', height: '450px' },
-        taskIcon: null
+    // Armazena Estado Inicial
+    const windowState = {
+        windowDiv, appName, isMaximized: false, taskIcon: null,
+        originalPosition: { left: windowDiv.style.left, top: windowDiv.style.top },
+        originalDimensions: { width: windowDiv.style.width, height: windowDiv.style.height },
+        dragMoveHandler: null, dragUpHandler: null, resizeMoveHandler: null, resizeUpHandler: null
     };
+    windowManager.windows[windowId] = windowState;
 
-    // 3. Event Handlers
-    let isDragging = false;
-    let offsetX, offsetY;
+    // --- 3. Event Handlers & Logic ---
+    let isDragging = false; let dragOffsetX, dragOffsetY;
+    let isResizing = false; let resizeStartX, resizeStartY, resizeStartWidth, resizeStartHeight;
 
+    // Dragging
+    const handleMouseMoveDrag = (e) => {
+         if (!isDragging) return; let newLeft = e.clientX - dragOffsetX; let newTop = e.clientY - dragOffsetY;
+         const titleBarHeight = titleBar.offsetHeight || 24; if (newTop < 0) newTop = 0; if (newTop > window.innerHeight - titleBarHeight) newTop = window.innerHeight - titleBarHeight;
+         if (newLeft < -(parseInt(windowDiv.style.width, 10) - 40)) newLeft = -(parseInt(windowDiv.style.width, 10) - 40); if (newLeft > window.innerWidth - 40) newLeft = window.innerWidth - 40;
+         windowDiv.style.left = `${newLeft}px`; windowDiv.style.top = `${newTop}px`;
+    };
+    const handleMouseUpDrag = () => {
+         if (!isDragging) return; isDragging = false; windowDiv.style.userSelect = ''; windowDiv.style.cursor = '';
+         if (!windowState.isMaximized) { windowState.originalPosition = { left: windowDiv.style.left, top: windowDiv.style.top }; }
+         document.removeEventListener('mousemove', handleMouseMoveDrag); document.removeEventListener('mouseup', handleMouseUpDrag);
+    };
     titleBar.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        offsetX = e.clientX - parseInt(windowDiv.style.left, 10);
-        offsetY = e.clientY - parseInt(windowDiv.style.top, 10);
-        windowDiv.style.zIndex = windowManager.zIndex++;
+         if (e.target.closest('.title-bar-controls') || windowState.isMaximized) return;
+         isDragging = true; dragOffsetX = e.clientX - parseInt(windowDiv.style.left, 10); dragOffsetY = e.clientY - parseInt(windowDiv.style.top, 10);
+         windowDiv.style.zIndex = windowManager.zIndex++; windowDiv.style.userSelect = 'none'; windowDiv.style.cursor = 'move';
+         windowState.taskIcon?.click(); document.addEventListener('mousemove', handleMouseMoveDrag); document.addEventListener('mouseup', handleMouseUpDrag);
+     });
+    titleBar.addEventListener('dblclick', (e) => { if (e.target.closest('.title-bar-controls')) return; if (canResize) maximizeRestore.click(); });
+    windowState.dragMoveHandler = handleMouseMoveDrag; windowState.dragUpHandler = handleMouseUpDrag;
+
+    // Resizing (Se aplicável)
+    if (canResize) {
+        const resizer = document.createElement('div'); resizer.className = 'resizer'; windowDiv.appendChild(resizer);
+
+        // Handler de movimento durante resize (revisado para clareza)
+        const handleMouseMoveResize = (e) => {
+            if (!isResizing) { return; }
+            let newWidth = resizeStartWidth + (e.clientX - resizeStartX);
+            let newHeight = resizeStartHeight + (e.clientY - resizeStartY);
+
+            // Leitura e validação de minWidth
+            const currentMinWidthStyle = windowDiv.style.minWidth;
+            const parsedMinWidth = parseInt(currentMinWidthStyle, 10);
+            const minWidth = (!isNaN(parsedMinWidth) && parsedMinWidth > 0) ? parsedMinWidth : 150;
+
+            // Leitura e validação de minHeight
+            const currentMinHeightStyle = windowDiv.style.minHeight;
+            const parsedMinHeight = parseInt(currentMinHeightStyle, 10);
+            const minHeight = (!isNaN(parsedMinHeight) && parsedMinHeight > 0) ? parsedMinHeight : 100;
+
+            // Aplica Mínimos
+            if (newWidth < minWidth) { newWidth = minWidth; }
+            if (newHeight < minHeight) { newHeight = minHeight; }
+
+            // Aplica Novas Dimensões
+            windowDiv.style.width = `${newWidth}px`;
+            windowDiv.style.height = `${newHeight}px`;
+
+            // Atualiza altura do conteúdo e estado
+            updateContentHeight();
+            if (!windowState.isMaximized) { windowState.originalDimensions = { width: `${newWidth}px`, height: `${newHeight}px` }; }
+
+            // Notifica iframe
+            const iframe = content.querySelector('iframe');
+            if (iframe) { try { iframe.contentWindow.dispatchEvent(new Event('resize')); } catch (err) {} }
+        };
+
+        const handleMouseUpResize = () => {
+             if (!isResizing) return; isResizing = false; windowDiv.style.userSelect = '';
+             document.removeEventListener('mousemove', handleMouseMoveResize); document.removeEventListener('mouseup', handleMouseUpResize);
+        };
+        resizer.addEventListener('mousedown', (e) => {
+            if (windowState.isMaximized) return; isResizing = true; resizeStartX = e.clientX; resizeStartY = e.clientY;
+            resizeStartWidth = parseInt(windowDiv.style.width, 10); resizeStartHeight = parseInt(windowDiv.style.height, 10);
+            windowDiv.style.userSelect = 'none'; document.addEventListener('mousemove', handleMouseMoveResize); document.addEventListener('mouseup', handleMouseUpResize);
+        });
+        windowState.resizeMoveHandler = handleMouseMoveResize; windowState.resizeUpHandler = handleMouseUpResize;
+    }
+
+    // Window Focusing
+     windowDiv.addEventListener('mousedown', () => {
+          if (parseInt(windowDiv.style.zIndex) < windowManager.zIndex - 1) { windowDiv.style.zIndex = windowManager.zIndex++; }
+          windowState.taskIcon?.click();
+      }, true);
+
+    // Control Button Actions
+    minimize.addEventListener('click', (e) => { e.stopPropagation(); windowDiv.style.display = 'none'; windowState.taskIcon?.classList.add('minimized'); windowState.taskIcon?.classList.remove('active'); titleBar.classList.add('inactive'); });
+    maximizeRestore.addEventListener('click', (e) => { e.stopPropagation(); if (!canResize) return;
+        if (windowState.isMaximized) { // Restore
+             windowDiv.style.left = windowState.originalPosition.left; windowDiv.style.top = windowState.originalPosition.top; windowDiv.style.width = windowState.originalDimensions.width; windowDiv.style.height = windowState.originalDimensions.height;
+             windowState.isMaximized = false; maximizeRestore.setAttribute('aria-label', 'Maximize'); windowDiv.querySelector('.resizer')?.style.display = ''; titleBar.style.cursor = 'move';
+         } else { // Maximize
+             windowState.originalPosition = { left: windowDiv.style.left, top: windowDiv.style.top }; windowState.originalDimensions = { width: windowDiv.style.width, height: windowDiv.style.height };
+             windowDiv.style.left = '0'; windowDiv.style.top = '0'; windowDiv.style.width = '100%'; windowDiv.style.height = `calc(100% - 32px)`;
+             windowState.isMaximized = true; maximizeRestore.setAttribute('aria-label', 'Restore'); windowDiv.querySelector('.resizer')?.style.display = 'none'; titleBar.style.cursor = 'default';
+         }
+         updateContentHeight(); const iframe = content.querySelector('iframe'); if (iframe) try { iframe.contentWindow.dispatchEvent(new Event('resize')); } catch (err) {} windowState.taskIcon?.click();
     });
 
-    titleBar.addEventListener('dblclick', () => {
-        console.log(`[window] Duplo clique em ${windowId}`);
-        maximizeRestore.click();
-    });
-
-    document.addEventListener('mousemove', (e) => {
-        if (isDragging) {
-            windowDiv.style.left = `${e.clientX - offsetX}px`;
-            windowDiv.style.top = `${e.clientY - offsetY}px`;
-            windowManager.windows[windowId].originalPosition = { left: windowDiv.style.left, top: windowDiv.style.top };
+    // --- 4. Cleanup Logic (Revisada) ---
+    close.addEventListener('click', (e) => {
+        e.stopPropagation(); console.log(`[window] Close ${windowId}`);
+        const stateToClean = windowManager.windows[windowId]; if (!stateToClean) { console.warn(`[window] Tentativa de fechar ${windowId} que já foi removida.`); return; }
+        try {
+            if (stateToClean.dragMoveHandler) document.removeEventListener('mousemove', stateToClean.dragMoveHandler);
+            if (stateToClean.dragUpHandler) document.removeEventListener('mouseup', stateToClean.dragUpHandler);
+            if (stateToClean.resizeMoveHandler) document.removeEventListener('mousemove', stateToClean.resizeMoveHandler);
+            if (stateToClean.resizeUpHandler) document.removeEventListener('mouseup', stateToClean.resizeUpHandler);
+            stateToClean.taskIcon?.remove(); stateToClean.windowDiv?.remove();
+            if (windowManager.windows[windowId]) { delete windowManager.windows[windowId]; console.log(`[window] Janela ${windowId} removida do gerenciador.`); }
+        } catch (error) {
+            console.error(`[window] Erro durante cleanup de ${windowId}:`, error);
+            document.getElementById(windowId)?.remove(); if (windowManager.windows[windowId]) delete windowManager.windows[windowId];
         }
     });
 
-    document.addEventListener('mouseup', () => {
-        isDragging = false;
-    });
+    // --- 5. Global Helper/Integration ---
+    if (typeof window.addTaskbarIcon === 'function') {
+        window.addTaskbarIcon(windowId, appName, appSettings);
+        setTimeout(() => { windowState.taskIcon?.click(); }, 0);
+    } else { console.error("[window] Função addTaskbarIcon não encontrada."); }
 
-    minimize.addEventListener('click', () => {
-        console.log(`[window] Minimizando ${windowId}`);
-        windowDiv.style.display = 'none';
-        if (windowManager.windows[windowId].taskIcon) {
-            windowManager.windows[windowId].taskIcon.classList.add('minimized');
-        }
-    });
-
-    maximizeRestore.addEventListener('click', () => {
-        console.log(`[window] Maximizando/Restaurando ${windowId}`);
-        if (windowManager.windows[windowId].isMaximized) {
-            windowDiv.style.left = windowManager.windows[windowId].originalPosition.left;
-            windowDiv.style.top = windowManager.windows[windowId].originalPosition.top;
-            windowDiv.style.width = windowManager.windows[windowId].originalDimensions.width;
-            windowDiv.style.height = windowManager.windows[windowId].originalDimensions.height;
-            windowManager.windows[windowId].isMaximized = false;
-            maximizeRestore.textContent = '□';
-        } else {
-            windowManager.windows[windowId].originalPosition = { left: windowDiv.style.left, top: windowDiv.style.top };
-            windowManager.windows[windowId].originalDimensions = { width: windowDiv.style.width, height: windowDiv.style.height };
-            windowDiv.style.left = '0';
-            windowDiv.style.top = '0';
-            windowDiv.style.width = '100%';
-            windowDiv.style.height = `calc(100% - 32px)`;
-            windowManager.windows[windowId].isMaximized = true;
-            maximizeRestore.textContent = '↔';
-        }
-        const iframe = content.querySelector('iframe');
-        if (iframe) {
-            iframe.style.width = '100%';
-            iframe.style.height = '100%';
-            window.dispatchEvent(new Event('resize'));
-        }
-    });
-
-    close.addEventListener('click', () => {
-        console.log(`[window] Fechando ${windowId}`);
-        if (windowManager.windows[windowId]?.taskIcon) {
-            windowManager.windows[windowId].taskIcon.remove();
-        }
-        document.getElementById('desktop').removeChild(windowDiv);
-        delete windowManager.windows[windowId];
-    });
-
-    window.addTaskbarIcon(windowId, appName, appSettings);
     return windowId;
-}
+} // Fim da função openWindow

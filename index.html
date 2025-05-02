@@ -4,27 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gaiat.OS</title>
+    <link rel="stylesheet" href="styles/98.css">
     <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
-    <div id="desktop"></div>
+    <div id="desktop">
+        </div>
+
     <div id="taskbar">
-        <div id="start-button">
+        <button id="start-button" class="button">
             <img src="assets/icons/gaiatos.ico" alt="Gaiat.OS">
             <span>Agilizar</span>
-        </div>
-        <div id="start-menu"></div>
-        <div id="clock"></div>
+        </button>
+
+        <div id="start-menu" style="display: none;"></div>
+
+        <div id="clock">
+            </div>
     </div>
+
     <script src="scripts/appConfig.js"></script>
     <script src="scripts/windows.js"></script>
     <script src="scripts/taskbar.js"></script>
     <script src="scripts/desktop.js"></script>
     <script>
+        // Script de inicialização
         document.addEventListener('DOMContentLoaded', () => {
             console.log('[index] Carregando Gaiat.OS');
-            initializeTaskbar();
-            desktopManager.initializeDesktop();
+            initializeTaskbar(); // Cria Taskbar, Clock, Menu Iniciar e área de ícones
+            desktopManager.initializeDesktop(); // Popula ícones do desktop
         });
     </script>
 </body>
