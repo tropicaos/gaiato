@@ -3,7 +3,7 @@
     2. Desktop Styles (Grid layout, Icon style)
     3. Taskbar Styles (Layout, Start Button adjustments, Clock/Tray style, Task Icon container)
     4. Window Styles (REMOVED - Handled by 98.css)
-    5. Start Menu Styles (Custom menu style - Kept)
+    5. Start Menu Styles (Custom menu style - CORRIGIDO LAYOUT SIDEBAR)
     6. Control Buttons (REMOVED - Handled by 98.css)
     7. Resizer Styles (Custom resizer style - Kept)
     8. Taskbar Icon Customizations (Adjustments for 98.css button base)
@@ -15,313 +15,146 @@ body {
   margin: 0;
   background: #008080; /* Desktop background color */
   overflow: hidden; /* Prevent body scrolling */
-  /* Base font set by 98.css */
 }
 
 /* 2. Desktop Styles */
 #desktop {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 32px; /* Space for the taskbar */
-  display: grid;
-  grid-template-columns: repeat(auto-fill, 80px);
-  grid-auto-rows: 80px;
-  gap: 10px;
-  padding: 10px;
-  overflow: hidden;
+  position: absolute; top: 0; left: 0; right: 0; bottom: 32px;
+  display: grid; grid-template-columns: repeat(auto-fill, 80px);
+  grid-auto-rows: 80px; gap: 10px; padding: 10px; overflow: hidden;
 }
-
-.icon { /* Style for desktop icons */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  text-align: center;
-  cursor: pointer;
-  padding-top: 5px;
-  overflow: hidden;
-  height: 100%;
-}
-
-.icon img {
-  width: 32px;
-  height: 32px;
-  margin-bottom: 5px;
-}
-
-.icon span {
-  color: #ffffff;
-  font-size: 11px; /* Match 98.css */
-  text-shadow: 1px 1px #000000;
-  max-height: 28px; /* Approx 2 lines */
-  overflow: hidden;
-  word-wrap: break-word;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
+.icon { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: center; cursor: pointer; padding-top: 5px; overflow: hidden; height: 100%; }
+.icon img { width: 32px; height: 32px; margin-bottom: 5px; }
+.icon span { color: #ffffff; font-size: 11px; text-shadow: 1px 1px #000000; max-height: 28px; overflow: hidden; word-wrap: break-word; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
 /* 3. Taskbar Styles */
 #taskbar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 32px;
-  background: var(--surface, #c0c0c0); /* Use 98.css variable */
-  /* Use 98.css border variables for raised effect */
-  border-top: var(--border-width, 1px) solid var(--button-highlight, #ffffff);
-  box-shadow: inset 0px 1px 0px var(--button-face, #dfdfdf), /* Inner top highlight */
-              inset 0 -1px 0px var(--button-shadow, #808080), /* Inner bottom shadow */
-              inset -1px 0 0px var(--button-shadow, #808080); /* Inner left shadow */
-  display: flex;
-  align-items: center;
-  z-index: 1001;
-  padding: 2px;
-  box-sizing: border-box;
-}
-
-#start-button { /* Adjustments for 98.css .button base */
-   min-width: auto;
-   padding: 1px 6px;
-   font-weight: bold;
-   height: 24px;
-   margin-right: 4px;
-   display: inline-flex; /* Ensure flex works inside button */
-   align-items: center;
-   vertical-align: middle; /* Align button properly in flex row */
-}
-#start-button img { /* Ensure image is vertically aligned */
-    vertical-align: middle;
-    width: 16px;
-    height: 16px;
-    margin-right: 3px;
-}
-#start-button span { /* Style text inside start button */
-    text-shadow: none; /* Override 98.css button text shadow if needed */
-    color: var(--text-color);
-    vertical-align: middle;
-    line-height: normal; /* Override line height if needed */
-}
-
-#taskbar-icons { /* Container for app icons */
-  display: flex;
-  gap: 2px;
-  margin-left: 4px;
-  flex-grow: 1;
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE */
-  height: 100%;
-  align-items: center;
-}
-#taskbar-icons::-webkit-scrollbar { display: none; } /* Chrome/Safari */
-
-#tray-icons { /* Container for tray icons */
-    display: flex;
-    align-items: center;
-    margin-left: auto; /* Pushes tray to the right */
-    margin-right: 4px;
-    height: 100%;
-}
-#tray-icons img {
-    vertical-align: middle; /* Align icons */
-}
-
-
-#clock { /* Container for time and tray icons */
-  /* Sunken border effect using 98.css variables */
-  box-shadow: var(--border-sunken-inner, inset -1px -1px #dfdfdf, inset 1px 1px #808080);
-  border: none;
-  padding: 2px 5px;
-  margin-left: 4px;
-  flex-shrink: 0;
-  font-size: 11px;
-  display: flex;
-  align-items: center;
-  height: 22px;
-  min-width: 50px; /* Ensure some space for time */
-  text-align: center; /* Center time if span fills width */
-}
-#clock .time-display { /* Span holding the time text */
-    margin-right: 5px; /* Space before tray icons */
-}
-
-
-/* 5. Start Menu Styles (Custom styles, kept from original) */
-#start-menu {
-  position: absolute;
-  bottom: 34px;
-  left: 2px;
-  width: 200px;
+  position: fixed; bottom: 0; left: 0; right: 0; height: 32px;
   background: var(--surface, #c0c0c0);
-  /* Raised border effect */
+  border-top: var(--border-width, 1px) solid var(--button-highlight, #ffffff);
+  box-shadow: inset 0px 1px 0px var(--button-face, #dfdfdf), inset 0 -1px 0px var(--button-shadow, #808080), inset -1px 0 0px var(--button-shadow, #808080);
+  display: flex; align-items: center; z-index: 1001; padding: 2px; box-sizing: border-box;
+}
+#start-button { min-width: auto; padding: 1px 6px; font-weight: bold; height: 24px; margin-right: 4px; display: inline-flex; align-items: center; vertical-align: middle; }
+#start-button img { vertical-align: middle; width: 16px; height: 16px; margin-right: 3px; }
+#start-button span { text-shadow: none; color: var(--text-color); vertical-align: middle; line-height: normal; }
+#taskbar-icons { display: flex; gap: 2px; margin-left: 4px; flex-grow: 1; overflow-x: auto; overflow-y: hidden; white-space: nowrap; scrollbar-width: none; -ms-overflow-style: none; height: 100%; align-items: center; }
+#taskbar-icons::-webkit-scrollbar { display: none; }
+#tray-icons { display: flex; align-items: center; margin-left: auto; margin-right: 4px; height: 100%; }
+#tray-icons img { vertical-align: middle; width: 16px; height: 16px; }
+#tray-icons img + img { margin-left: 3px; } /* Espaço entre ícones da bandeja */
+#clock { box-shadow: var(--border-sunken-inner, inset -1px -1px #dfdfdf, inset 1px 1px #808080); border: none; padding: 2px 5px; margin-left: 4px; flex-shrink: 0; font-size: 11px; display: flex; align-items: center; height: 22px; min-width: 50px; text-align: center; }
+#clock .time-display { margin-right: 5px; }
+
+/* 5. Start Menu Styles - CORRIGIDO LAYOUT SIDEBAR */
+#start-menu {
+  position: absolute; bottom: 34px; left: 2px;
+  width: 200px; /* Largura fixa inicial */
+  background: var(--surface, #c0c0c0);
   border: var(--border-width, 1px) solid;
   border-color: var(--button-highlight, #ffffff) var(--button-shadow, #808080) var(--button-shadow, #808080) var(--button-highlight, #ffffff);
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  display: none;
+  display: none; /* Começa escondido */
   z-index: 1002;
+  /* Flex row por padrão, alinha itens para esticar na altura */
+  display: flex;
   flex-direction: row;
+  align-items: stretch; /* Faz sidebar e container esticarem */
 }
 
 .menu-sidebar {
-  width: 25px;
+  width: 25px; /* Largura fixa */
   background: var(--dialog-gray, #808080);
   color: var(--button-highlight, #ffffff);
-  writing-mode: vertical-rl;
+  /* Tenta manter texto vertical */
+  writing-mode: vertical-lr; /* Ou vertical-rl dependendo da rotação desejada */
   text-orientation: mixed;
-  transform: rotate(180deg);
+  /* Removido transform rotate */
   display: flex;
-  align-items: center;
+  align-items: center; /* Centraliza conteúdo (texto) */
   justify-content: center;
-  font-size: 12px;
+  font-size: 14px; /* Aumenta um pouco */
   font-weight: bold;
   text-shadow: 1px 1px #000;
-  flex-shrink: 0;
-   /* Raised border effect on right */
-  border-right: var(--border-width, 1px) solid;
-  border-right-color: var(--button-shadow, #808080);
+  flex-shrink: 0; /* Não encolhe */
+  /* Borda Raised à direita */
+  border-right: var(--border-width, 1px) solid var(--button-shadow, #808080);
   box-shadow: inset -1px 0 0 var(--button-highlight, #ffffff);
-
+  padding: 5px 0; /* Espaçamento vertical interno */
+  text-align: center; /* Garante centralização do texto */
 }
 
 .menu-items-container {
-  flex-grow: 1;
+  flex-grow: 1; /* Ocupa o resto do espaço */
   display: flex;
   flex-direction: column;
-  padding: 2px;
+  padding: 2px; /* Pequeno padding interno */
+  overflow-y: auto; /* Adiciona scroll se itens não couberem */
+  max-height: calc(100vh - 100px); /* Limita altura máxima */
 }
 
 .menu-item {
-  padding: 4px 8px;
+  padding: 4px 8px 4px 4px; /* Ajusta padding */
   display: flex;
   align-items: center;
   cursor: pointer;
   color: var(--text-color, #222222);
-  min-height: 22px; /* Ensure consistent height */
+  min-height: 22px;
+  white-space: nowrap; /* Impede quebra de linha do texto */
 }
-.menu-item u { /* Ensure underline uses correct color */
-    color: inherit;
-    border-color: inherit;
-}
+.menu-item img { flex-shrink: 0; } /* Ícone não encolhe */
+.menu-item span { flex-grow: 1; overflow: hidden; text-overflow: ellipsis; } /* Texto cresce e usa ellipsis */
+.menu-item .submenu-triangle { margin-left: auto; font-size: 8px; padding-left: 5px; } /* Triângulo à direita */
 
-.menu-item:hover {
+.menu-item:hover { /* Estilo hover mantido */
   background: var(--dialog-blue, #000080);
-  color: var(--button-highlight, #ffffff);
-}
-.menu-item:hover span, .menu-item:hover span u {
   color: var(--button-highlight, #ffffff);
 }
 
 .submenu {
-  min-width: 180px; /* Minimum width */
-  width: auto; /* Allow wider if needed */
+  min-width: 180px; width: auto; /* Largura automática */
   background: var(--surface, #c0c0c0);
   border: var(--border-width, 1px) solid;
   border-color: var(--button-highlight, #ffffff) var(--button-shadow, #808080) var(--button-shadow, #808080) var(--button-highlight, #ffffff);
-  z-index: 1003;
-  position: absolute;
-  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  padding: 2px;
-  display: none; /* Added to ensure consistency */
+  z-index: 1003; position: absolute; box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  padding: 2px; display: none;
+  /* Estilos 'left' e 'top' são definidos via JS agora */
+  /* Adiciona 'bottom' para posicionamento alternativo */
+  bottom: auto;
 }
-.submenu .menu-item { /* Items inside submenu */
-     min-height: 22px;
+.submenu .menu-item { min-height: 22px; }
+
+.menu-separator { /* Estilo para separadores */
+  height: 2px;
+  border-top: 1px solid var(--button-shadow, #808080);
+  border-bottom: 1px solid var(--button-highlight, #ffffff);
+  margin: 2px 0;
+  padding: 0;
 }
 
 
-/* 7. Resizer Styles (Custom style, kept from original) */
-.resizer {
-  width: 16px;
-  height: 16px;
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  cursor: se-resize;
-  /* Visual indicator using gradients */
-  background: radial-gradient(circle at 0 0,
-      transparent 0, transparent 7px,
-      var(--button-shadow, #808080) 7px, var(--button-shadow, #808080) 8px,
-      transparent 8px),
-    radial-gradient(circle at 0 0,
-      transparent 0, transparent 11px,
-      var(--button-shadow, #808080) 11px, var(--button-shadow, #808080) 12px,
-      transparent 12px);
-   background-position: bottom right;
-   background-repeat: no-repeat;
-   background-color: var(--surface, #c0c0c0); /* Match window background */
-   /* Ensure it's above content slightly if needed */
-   z-index: 1;
+/* 7. Resizer Styles */
+.resizer { /* Mantido igual */
+  width: 16px; height: 16px; position: absolute; right: 0; bottom: 0; cursor: se-resize;
+  background: radial-gradient(circle at 0 0, transparent 0, transparent 7px, var(--button-shadow, #808080) 7px, var(--button-shadow, #808080) 8px, transparent 8px), radial-gradient(circle at 0 0, transparent 0, transparent 11px, var(--button-shadow, #808080) 11px, var(--button-shadow, #808080) 12px, transparent 12px);
+  background-position: bottom right; background-repeat: no-repeat; background-color: var(--surface, #c0c0c0); z-index: 1;
 }
 
 /* 8. Taskbar Icon Customizations */
-.task-icon { /* Applied to the <button> element */
-  padding: 1px 5px !important; /* Compact padding */
-  height: 22px;
-  max-width: 160px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  display: inline-flex !important;
-  align-items: center !important;
-  vertical-align: middle;
-  font-weight: normal; /* Override button bold if any */
-  min-width: auto; /* Override 98.css default min-width */
+.task-icon { /* Mantido igual */
+  padding: 1px 5px !important; height: 22px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  display: inline-flex !important; align-items: center !important; vertical-align: middle; font-weight: normal; min-width: auto;
 }
-.task-icon img {
-    /* Inherited from JS */
-    vertical-align: middle;
-}
-.task-icon span {
-    text-shadow: none !important;
-    color: var(--text-color) !important;
-    margin-left: 3px; /* Space between icon and text */
-    vertical-align: middle;
-    line-height: normal;
-    overflow: hidden; /* Needed for ellipsis */
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    display: inline-block; /* Needed for ellipsis */
-    max-width: 120px; /* Adjust as needed */
-}
+.task-icon img { vertical-align: middle; width: 16px; height: 16px;}
+.task-icon span { text-shadow: none !important; color: var(--text-color) !important; margin-left: 3px; vertical-align: middle; line-height: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; max-width: 120px; }
+.task-icon.active { box-shadow: var(--border-sunken-outer, inset -1px -1px #fff, inset 1px 1px #0a0a0a), var(--border-sunken-inner, inset -2px -2px #dfdfdf, inset 2px 2px #808080) !important; padding-top: 2px !important; padding-left: 6px !important; }
+.task-icon.minimized { opacity: 0.7; }
 
-/* Active state for taskbar icon */
-.task-icon.active {
-  /* Use 98.css sunken style */
-  box-shadow: var(--border-sunken-outer, inset -1px -1px #fff, inset 1px 1px #0a0a0a),
-              var(--border-sunken-inner, inset -2px -2px #dfdfdf, inset 2px 2px #808080) !important;
-  /* Simulate press by moving content slightly */
-  padding-top: 2px !important;
-  padding-left: 6px !important;
-}
-.task-icon.active span {
-   /* Text shadow appears on active button in 98.css */
-   /* text-shadow: 1px 1px var(--text-color) !important; */ /* Optional, can look weird */
-}
-
-/* Minimized state style (custom) */
-.task-icon.minimized {
-  opacity: 0.7;
-  /* Could add other visual cues if desired */
-}
-
-/* 9. Media Queries (Basic example, adjust as needed) */
+/* 9. Media Queries */
 @media (max-width: 768px) {
-  #taskbar-icons {
-      /* Allow icons container to shrink more on small screens */
-      flex-basis: 50px; /* Example minimum space */
-  }
-  #start-menu {
-      width: calc(100% - 4px); /* Full width minus padding */
-      left: 2px;
-  }
-  .icon span {
-        font-size: 10px; /* Smaller text on mobile */
-        max-height: 24px; /* Adjust line clamp if needed */
-        -webkit-line-clamp: 2;
-  }
+  #taskbar-icons { flex-basis: 50px; }
+  #start-menu { width: calc(100% - 4px); left: 2px; }
+  .icon span { font-size: 10px; max-height: 24px; -webkit-line-clamp: 2; }
+  .menu-sidebar { width: 20px; font-size: 11px; } /* Ajusta largura e fonte da sidebar */
+  .submenu { /* Ajuste fino pode ser necessário no JS para posicionar */ min-width: 150px; }
 }

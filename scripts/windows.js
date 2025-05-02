@@ -1,16 +1,8 @@
 /* TABLE OF CONTENTS
     1. Window Manager Object (windowManager)
-       - windows object store
-       - zIndex counter
-       - windowTypes definitions
     2. Window Creation Function (openWindow)
-       - Criação de DOM, aplicação de classes 98.css
-       - Lógica de instância única e placeholders
-       - Criação de conteúdo (iframe ou direto)
-    3. Event Handlers & Logic (dentro de openWindow)
-       - Dragging, Resizing, Focusing
-       - Maximize/Restore, Minimize, Close Actions
-    4. Cleanup Logic (dentro do 'close' handler) - REVISADO
+    3. Event Handlers & Logic (dentro de openWindow) - RESIZE COMENTADO
+    4. Cleanup Logic (dentro do 'close' handler)
     5. Global Helper/Integration (Chamada para addTaskbarIcon)
 */
 
@@ -24,7 +16,6 @@ const windowManager = {
                 const appSettings = window.appConfig[appName] || {}; let iframeSrc = null;
                 if (appName === 'notepad') iframeSrc = './notepad/index.html';
                 else if (appName === 'benji') iframeSrc = './text-engine/index.html';
-                // else if (appName === 'outroApp') iframeSrc = './outroApp/index.html'; // Adicionar outros
                 if (iframeSrc) {
                     const iframe = document.createElement('iframe'); iframe.src = iframeSrc;
                     iframe.style.width = '100%'; iframe.style.height = '100%'; iframe.style.border = 'none';
@@ -33,18 +24,10 @@ const windowManager = {
             }
         },
         settings: { createContent: (appName, contentDiv) => {
-                 contentDiv.innerHTML = `
-                     <h3 style="margin-top: 0;">Propriedades do Sistema</h3>
-                     <p>Sistema Operacional: Gaiat.OS</p><p>Versão: 0.1 Alpha</p>
-                     <p>Baseado em: 98.css</p><p style="margin-top: 15px;">Desenvolvido por: Poligonal</p>`;
+                 contentDiv.innerHTML = `<h3 style="margin-top: 0;">Propriedades do Sistema</h3><p>Sistema Operacional: Gaiat.OS</p><p>Versão: 0.1 Alpha</p><p>Baseado em: 98.css</p><p style="margin-top: 15px;">Desenvolvido por: Poligonal</p>`;
              }},
         help: { createContent: (appName, contentDiv) => {
-                 contentDiv.innerHTML = `
-                     <h3 style="margin-top: 0;">Ajuda do Gaiat.OS</h3>
-                     <p>Bem-vindo ao sistema de ajuda.</p><p>Use o menu 'Agilizar' para acessar programas e acessórios.</p>
-                     <p>Clique e arraste a barra de título para mover janelas.</p>
-                     <p>Use os botões no canto superior direito para controlar as janelas.</p>
-                     <p><i>(Esta seção está em desenvolvimento)</i></p>`;
+                 contentDiv.innerHTML = `<h3 style="margin-top: 0;">Ajuda do Gaiat.OS</h3><p>Bem-vindo ao sistema de ajuda.</p><p>Use o menu 'Agilizar' para acessar programas e acessórios.</p><p>Clique e arraste a barra de título para mover janelas.</p><p>Use os botões no canto superior direito para controlar as janelas.</p><p><i>(Esta seção está em desenvolvimento)</i></p>`;
              }},
         message: { createContent: (appName, contentDiv, windowId) => {
                  contentDiv.innerHTML = `<p style="margin-bottom: 20px; text-align: center;">Tem certeza que deseja desligar o sistema?</p><div style="display: flex; justify-content: center; gap: 10px;"><button id="shutdown-yes-${windowId}" class="button">Sim</button><button id="shutdown-no-${windowId}" class="button">Não</button></div>`;
@@ -58,7 +41,7 @@ const windowManager = {
 };
 
 /* 2. Window Creation Function */
-function openWindow(appName) { // Função global
+function openWindow(appName) {
     if (!appName) { console.error("[window] Tentativa de abrir janela sem appName."); return null; }
     console.log(`[window] Abrindo ${appName}`);
     const appSettings = window.appConfig[appName] || { title: appName, icon: 'assets/icons/default.ico', allowMultipleInstances: true, resizable: true };
@@ -80,12 +63,10 @@ function openWindow(appName) { // Função global
     const titleIcon = document.createElement('img'); titleIcon.src = appSettings.icon; titleIcon.style.width = '16px'; titleIcon.style.height = '16px'; titleIcon.style.marginRight = '3px'; titleIcon.ondragstart = () => false;
     const titleTextDiv = document.createElement('div'); titleTextDiv.className = 'title-bar-text'; titleTextDiv.textContent = appSettings.title || appName;
     const titleButtons = document.createElement('div'); titleButtons.className = 'title-bar-controls';
-    // Botões
     const minimize = document.createElement('button'); minimize.className = 'button'; minimize.setAttribute('aria-label', 'Minimize');
     const maximizeRestore = document.createElement('button'); maximizeRestore.className = 'button'; maximizeRestore.setAttribute('aria-label', 'Maximize');
     const canResize = appSettings.resizable !== false && appName !== 'shutdown'; if (!canResize) maximizeRestore.disabled = true;
     const close = document.createElement('button'); close.className = 'button'; close.setAttribute('aria-label', 'Close');
-    // Montagem Title Bar
     titleButtons.appendChild(minimize); if (canResize) titleButtons.appendChild(maximizeRestore); titleButtons.appendChild(close);
     titleBar.appendChild(titleIcon); titleBar.appendChild(titleTextDiv); titleBar.appendChild(titleButtons);
 
@@ -94,14 +75,9 @@ function openWindow(appName) { // Função global
     const updateContentHeight = () => { const tbH = titleBar.offsetHeight || 24; const wP = 6; content.style.height = `calc(100% - ${tbH}px - ${wP}px)`; };
     updateContentHeight(); content.style.boxSizing = 'border-box'; content.style.overflow = 'auto';
 
-    // Montagem Janela
     windowDiv.appendChild(titleBar); windowDiv.appendChild(content);
-
-    // Popula Conteúdo
     const windowType = appName === 'system-properties' ? 'settings' : appName === 'help' ? 'help' : appName === 'shutdown' ? 'message' : 'standard';
     windowManager.windowTypes[windowType].createContent(appName, content, windowId);
-
-    // Adiciona ao DOM
     document.getElementById('desktop').appendChild(windowDiv);
 
     // Armazena Estado Inicial
@@ -115,7 +91,7 @@ function openWindow(appName) { // Função global
 
     // --- 3. Event Handlers & Logic ---
     let isDragging = false; let dragOffsetX, dragOffsetY;
-    let isResizing = false; let resizeStartX, resizeStartY, resizeStartWidth, resizeStartHeight;
+    //let isResizing = false; let resizeStartX, resizeStartY, resizeStartWidth, resizeStartHeight; // Comentado com o bloco abaixo
 
     // Dragging
     const handleMouseMoveDrag = (e) => {
@@ -138,9 +114,16 @@ function openWindow(appName) { // Função global
     titleBar.addEventListener('dblclick', (e) => { if (e.target.closest('.title-bar-controls')) return; if (canResize) maximizeRestore.click(); });
     windowState.dragMoveHandler = handleMouseMoveDrag; windowState.dragUpHandler = handleMouseUpDrag;
 
+
+    // ==================================================
+    // == INÍCIO DO BLOCO DE RESIZE TEMPORARIAMENTE COMENTADO ==
+    // ==================================================
+    /*
     // Resizing (Se aplicável)
     if (canResize) {
         const resizer = document.createElement('div'); resizer.className = 'resizer'; windowDiv.appendChild(resizer);
+        let isResizing = false; // Define isResizing localmente para este bloco
+        let resizeStartX, resizeStartY, resizeStartWidth, resizeStartHeight;
 
         // Handler de movimento durante resize (revisado para clareza)
         const handleMouseMoveResize = (e) => {
@@ -148,12 +131,12 @@ function openWindow(appName) { // Função global
             let newWidth = resizeStartWidth + (e.clientX - resizeStartX);
             let newHeight = resizeStartHeight + (e.clientY - resizeStartY);
 
-            // Leitura e validação de minWidth
+            // Obtém e valida o minWidth do estilo
             const currentMinWidthStyle = windowDiv.style.minWidth;
             const parsedMinWidth = parseInt(currentMinWidthStyle, 10);
             const minWidth = (!isNaN(parsedMinWidth) && parsedMinWidth > 0) ? parsedMinWidth : 150;
 
-            // Leitura e validação de minHeight
+            // Obtém e valida o minHeight do estilo
             const currentMinHeightStyle = windowDiv.style.minHeight;
             const parsedMinHeight = parseInt(currentMinHeightStyle, 10);
             const minHeight = (!isNaN(parsedMinHeight) && parsedMinHeight > 0) ? parsedMinHeight : 100;
@@ -172,7 +155,7 @@ function openWindow(appName) { // Função global
 
             // Notifica iframe
             const iframe = content.querySelector('iframe');
-            if (iframe) { try { iframe.contentWindow.dispatchEvent(new Event('resize')); } catch (err) {} }
+            if (iframe) { try { iframe.contentWindow.dispatchEvent(new Event('resize')); } catch (err) { } }
         };
 
         const handleMouseUpResize = () => {
@@ -186,6 +169,11 @@ function openWindow(appName) { // Função global
         });
         windowState.resizeMoveHandler = handleMouseMoveResize; windowState.resizeUpHandler = handleMouseUpResize;
     }
+    */
+    // ================================================
+    // == FIM DO BLOCO DE RESIZE TEMPORARIAMENTE COMENTADO ==
+    // ================================================
+
 
     // Window Focusing
      windowDiv.addEventListener('mousedown', () => {
@@ -198,11 +186,15 @@ function openWindow(appName) { // Função global
     maximizeRestore.addEventListener('click', (e) => { e.stopPropagation(); if (!canResize) return;
         if (windowState.isMaximized) { // Restore
              windowDiv.style.left = windowState.originalPosition.left; windowDiv.style.top = windowState.originalPosition.top; windowDiv.style.width = windowState.originalDimensions.width; windowDiv.style.height = windowState.originalDimensions.height;
-             windowState.isMaximized = false; maximizeRestore.setAttribute('aria-label', 'Maximize'); windowDiv.querySelector('.resizer')?.style.display = ''; titleBar.style.cursor = 'move';
+             windowState.isMaximized = false; maximizeRestore.setAttribute('aria-label', 'Maximize');
+             // windowDiv.querySelector('.resizer')?.style.display = ''; // Resizer está comentado
+             titleBar.style.cursor = 'move';
          } else { // Maximize
              windowState.originalPosition = { left: windowDiv.style.left, top: windowDiv.style.top }; windowState.originalDimensions = { width: windowDiv.style.width, height: windowDiv.style.height };
              windowDiv.style.left = '0'; windowDiv.style.top = '0'; windowDiv.style.width = '100%'; windowDiv.style.height = `calc(100% - 32px)`;
-             windowState.isMaximized = true; maximizeRestore.setAttribute('aria-label', 'Restore'); windowDiv.querySelector('.resizer')?.style.display = 'none'; titleBar.style.cursor = 'default';
+             windowState.isMaximized = true; maximizeRestore.setAttribute('aria-label', 'Restore');
+             // windowDiv.querySelector('.resizer')?.style.display = 'none'; // Resizer está comentado
+             titleBar.style.cursor = 'default';
          }
          updateContentHeight(); const iframe = content.querySelector('iframe'); if (iframe) try { iframe.contentWindow.dispatchEvent(new Event('resize')); } catch (err) {} windowState.taskIcon?.click();
     });
@@ -212,23 +204,35 @@ function openWindow(appName) { // Função global
         e.stopPropagation(); console.log(`[window] Close ${windowId}`);
         const stateToClean = windowManager.windows[windowId]; if (!stateToClean) { console.warn(`[window] Tentativa de fechar ${windowId} que já foi removida.`); return; }
         try {
+            // Remove listeners globais associados a esta janela
             if (stateToClean.dragMoveHandler) document.removeEventListener('mousemove', stateToClean.dragMoveHandler);
             if (stateToClean.dragUpHandler) document.removeEventListener('mouseup', stateToClean.dragUpHandler);
-            if (stateToClean.resizeMoveHandler) document.removeEventListener('mousemove', stateToClean.resizeMoveHandler);
-            if (stateToClean.resizeUpHandler) document.removeEventListener('mouseup', stateToClean.resizeUpHandler);
-            stateToClean.taskIcon?.remove(); stateToClean.windowDiv?.remove();
-            if (windowManager.windows[windowId]) { delete windowManager.windows[windowId]; console.log(`[window] Janela ${windowId} removida do gerenciador.`); }
+            // Não precisa remover listeners de resize, pois o bloco está comentado
+            // if (stateToClean.resizeMoveHandler) document.removeEventListener('mousemove', stateToClean.resizeMoveHandler);
+            // if (stateToClean.resizeUpHandler) document.removeEventListener('mouseup', stateToClean.resizeUpHandler);
+
+            // Remove elementos associados
+            stateToClean.taskIcon?.remove();
+            stateToClean.windowDiv?.remove();
+            // Remove referência do gerenciador
+            if (windowManager.windows[windowId]) {
+                delete windowManager.windows[windowId];
+                console.log(`[window] Janela ${windowId} removida do gerenciador.`);
+            }
         } catch (error) {
             console.error(`[window] Erro durante cleanup de ${windowId}:`, error);
-            document.getElementById(windowId)?.remove(); if (windowManager.windows[windowId]) delete windowManager.windows[windowId];
+            document.getElementById(windowId)?.remove(); // Fallback
+            if (windowManager.windows[windowId]) delete windowManager.windows[windowId];
         }
     });
 
     // --- 5. Global Helper/Integration ---
+    // Adiciona o ícone mesmo com a janela simplificada, mas ele não terá todos os listeners
     if (typeof window.addTaskbarIcon === 'function') {
         window.addTaskbarIcon(windowId, appName, appSettings);
+         // Foca a janela (mesmo simplificada)
         setTimeout(() => { windowState.taskIcon?.click(); }, 0);
     } else { console.error("[window] Função addTaskbarIcon não encontrada."); }
 
-    return windowId;
+    return windowId; // Sucesso
 } // Fim da função openWindow
