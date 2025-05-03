@@ -60,17 +60,16 @@ body {
 }
 
 
-/* 5. Start Menu Styles - LAYOUT CORRIGIDO */
+/* 5. Start Menu Styles */
 #start-menu {
   position: absolute; bottom: 34px; left: 2px;
-  width: 220px; /* Aumentei um pouco a largura */
+  width: 220px;
   background: var(--surface, #c0c0c0);
   border: var(--border-width, 1px) solid;
   border-color: var(--button-highlight, #ffffff) var(--button-shadow, #808080) var(--button-shadow, #808080) var(--button-highlight, #ffffff);
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  display: none; /* Começa escondido */
+  display: none;
   z-index: 1002;
-  /* Flex row e align stretch SÃO ESSENCIAIS */
   display: flex;
   flex-direction: row;
   align-items: stretch;
@@ -79,19 +78,18 @@ body {
 }
 
 .menu-sidebar {
-  width: 25px; /* Largura fixa */
+  width: 25px;
   background: linear-gradient(to bottom, var(--dialog-blue, #000080), #0000A0 80%, var(--dialog-blue-light, #1084d0)); /* Degradê */
   color: var(--button-highlight, #ffffff);
-  writing-mode: vertical-lr; /* Texto vertical */
+  writing-mode: vertical-lr;
   text-orientation: mixed;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   font-size: 14px;
   font-weight: bold;
   text-shadow: 1px 1px #000;
-  flex-shrink: 0; /* Não encolhe */
-  /* Borda raised à direita */
+  flex-shrink: 0;
   border-right: var(--border-width, 1px) solid var(--button-shadow, #808080);
   box-shadow: inset -1px 0 0 var(--button-highlight, #ffffff);
   padding: 5px 0;
