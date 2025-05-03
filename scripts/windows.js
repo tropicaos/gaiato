@@ -44,7 +44,7 @@ const windowManager = {
 function openWindow(appName) {
     if (!appName) { console.error("[window] Tentativa de abrir janela sem appName."); return null; }
     console.log(`[window] Abrindo ${appName}`);
-    const appSettings = window.appConfig[appName] || { title: appName, icon: 'assets/icons/default.ico', allowMultipleInstances: true, resizable: true };
+    const appSettings = window.appConfig[appName] || { title: appName, icon: 'assets/icons/Programs.ico', allowMultipleInstances: true, resizable: true };
 
     if (['poligonal', 'gaiato', 'pinto'].includes(appName)) { alert(`O aplicativo '${appSettings.title}' ainda é um placeholder.`); console.log(`[window] Bloqueado placeholder: ${appName}`); return null; }
 
@@ -112,6 +112,69 @@ function openWindow(appName) {
          windowState.taskIcon?.click(); document.addEventListener('mousemove', handleMouseMoveDrag); document.addEventListener('mouseup', handleMouseUpDrag);
      });
     titleBar.addEventListener('dblclick', (e) => { if (e.target.closest('.title-bar-controls')) return; if (canResize) maximizeRestore.click(); });
+     // --- Touch Dragging Logic ---
+     let touchStartX, touchStartY; // Variáveis específicas para touch
+
+     const handleTouchMoveDrag = (e) => {
+         if (!isDragging) return;
+         // Previne scroll da página enquanto arrasta
+         e.preventDefault();
+         const touch = e.touches[0]; // Pega o primeiro toque
+         let newLeft = touch.clientX - dragOffsetX; // Reutiliza dragOffset calculado no touchstart
+         let newTop = touch.clientY - dragOffsetY;
+ 
+         // Lógica de limites (igual ao mousemove)
+         const titleBarHeight = titleBar.offsetHeight || 24;
+         if (newTop < 0) newTop = 0;
+         if (newTop > window.innerHeight - titleBarHeight) newTop = window.innerHeight - titleBarHeight;
+         if (newLeft < -(parseInt(windowDiv.style.width, 10) - 40)) newLeft = -(parseInt(windowDiv.style.width, 10) - 40);
+         if (newLeft > window.innerWidth - 40) newLeft = window.innerWidth - 40;
+ 
+         windowDiv.style.left = `${newLeft}px`;
+         windowDiv.style.top = `${newTop}px`;
+     };
+ 
+     const handleTouchEndDrag = () => {
+         if (!isDragging) return;
+         isDragging = false;
+         // Salva posição final se não estiver maximizado
+         if (!windowState.isMaximized) {
+             windowState.originalPosition = { left: windowDiv.style.left, top: windowDiv.style.top };
+         }
+         // Remove listeners globais de toque
+         document.removeEventListener('touchmove', handleTouchMoveDrag);
+         document.removeEventListener('touchend', handleTouchEndDrag);
+         document.removeEventListener('touchcancel', handleTouchEndDrag); // Importante para cancelamentos
+     };
+ 
+     titleBar.addEventListener('touchstart', (e) => {
+         // Ignora se for nos botões ou maximizado
+         if (e.target.closest('.title-bar-controls') || windowState.isMaximized) {
+             return;
+         }
+         // Previne scroll padrão
+         e.preventDefault();
+         isDragging = true; // Reutiliza a flag
+         const touch = e.touches[0];
+         touchStartX = touch.clientX; // Guarda posição inicial do toque
+         touchStartY = touch.clientY;
+         // Calcula offset inicial
+         dragOffsetX = touchStartX - parseInt(windowDiv.style.left, 10);
+         dragOffsetY = touchStartY - parseInt(windowDiv.style.top, 10);
+         // Traz para frente e foca
+         windowDiv.style.zIndex = windowManager.zIndex++;
+         windowState.taskIcon?.click();
+         // Adiciona listeners globais para move e end/cancel
+         document.addEventListener('touchmove', handleTouchMoveDrag, { passive: false });
+         document.addEventListener('touchend', handleTouchEndDrag);
+         document.addEventListener('touchcancel', handleTouchEndDrag);
+ 
+     }, { passive: false }); // passive: false no start para permitir preventDefault
+ 
+     // Guarda referência aos handlers de mouse (como antes)
+     windowState.dragMoveHandler = handleMouseMoveDrag;
+     windowState.dragUpHandler = handleMouseUpDrag;
+ 
     windowState.dragMoveHandler = handleMouseMoveDrag; windowState.dragUpHandler = handleMouseUpDrag;
 
 

@@ -60,41 +60,47 @@ body {
 }
 
 
-/* 5. Start Menu Styles */
+/* styles/main.css - Substitua a Seção 5 existente por esta */
+
+/* 5. Start Menu Styles - LAYOUT CORRIGIDO */
 #start-menu {
   position: absolute; bottom: 34px; left: 2px;
-  width: 220px;
+  width: 220px; /* Aumentei um pouco a largura */
   background: var(--surface, #c0c0c0);
   border: var(--border-width, 1px) solid;
   border-color: var(--button-highlight, #ffffff) var(--button-shadow, #808080) var(--button-shadow, #808080) var(--button-highlight, #ffffff);
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  display: none;
+  display: none; /* Começa escondido */
   z-index: 1002;
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  min-height: 150px;
-  max-height: calc(100vh - 50px);
+  /* Flex row por padrão, alinha itens para esticar na altura */
+  display: flex; /* Garante flexbox */
+  flex-direction: row; /* Sidebar | Itens */
+  align-items: stretch; /* FAZ OS FILHOS ESTICAREM NA ALTURA */
+  min-height: 150px; /* Altura mínima para visualização */
+  max-height: calc(100vh - 50px); /* Limita altura máxima */
 }
 
 .menu-sidebar {
-  width: 25px;
-  background: linear-gradient(to bottom, var(--dialog-blue, #000080), #0000A0 80%, var(--dialog-blue-light, #1084d0)); /* Degradê */
+  width: 25px; /* Largura fixa */
+  /* Exemplo de Degradê - ajuste cores como preferir */
+  background: linear-gradient(to bottom, var(--dialog-blue, #000080), #0000A0 80%, var(--dialog-blue-light, #1084d0)); /* Degradê Win95 */
   color: var(--button-highlight, #ffffff);
+  /* Texto Vertical (sem rotação que quebra layout flex) */
   writing-mode: vertical-lr;
   text-orientation: mixed;
   display: flex;
-  align-items: stretch;
+  align-items: center; /* Centraliza texto */
   justify-content: center;
   font-size: 14px;
   font-weight: bold;
   text-shadow: 1px 1px #000;
-  flex-shrink: 0;
+  flex-shrink: 0; /* Não encolhe */
+  /* Borda Raised à direita */
   border-right: var(--border-width, 1px) solid var(--button-shadow, #808080);
   box-shadow: inset -1px 0 0 var(--button-highlight, #ffffff);
   padding: 5px 0;
   text-align: center;
-  /* align-self: stretch; é herdado */
+  /* align-self: stretch; é herdado do pai com align-items: stretch */
 }
 
 .menu-items-container {
@@ -102,7 +108,8 @@ body {
   display: flex;
   flex-direction: column;
   padding: 2px;
-  overflow-y: auto;
+  overflow-y: auto; /* Scroll se necessário */
+  /* Não precisa de max-height aqui se já tem no #start-menu */
 }
 
 .menu-item {
@@ -115,17 +122,22 @@ body {
 .menu-item:hover { background: var(--dialog-blue, #000080); color: var(--button-highlight, #ffffff); }
 
 .submenu {
-  min-width: 180px; width: auto;
+  min-width: 180px; width: auto; /* Largura automática */
   background: var(--surface, #c0c0c0); border: var(--border-width, 1px) solid;
   border-color: var(--button-highlight, #ffffff) var(--button-shadow, #808080) var(--button-shadow, #808080) var(--button-highlight, #ffffff);
   z-index: 1003; position: absolute; box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  padding: 2px; display: none; max-height: calc(100vh - 50px); overflow-y: auto; bottom: auto;
+  padding: 2px; display: none;
+  max-height: calc(100vh - 50px); /* Limita altura */
+  overflow-y: auto; /* Scroll se necessário */
+  bottom: auto; /* Garante reset */
 }
 .submenu .menu-item { min-height: 22px; }
 
-.menu-separator {
+.menu-separator { /* Estilo para separadores */
   height: 2px; border-top: 1px solid var(--button-shadow, #808080); border-bottom: 1px solid var(--button-highlight, #ffffff); margin: 2px 0; padding: 0;
 }
+
+/* Certifique-se que a regra do body para touch-action está na Seção 1 */
 
 
 /* 7. Resizer Styles */

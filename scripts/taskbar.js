@@ -35,7 +35,11 @@ function initializeTaskbar() {
 
     updateClock();
     initializeStartMenu(); // Chama a função atualizada
-    setupMobileScroll(taskbarIconsContainer); // Chama a função atualizada
+    if (taskbarIconsContainer) {
+        setupMobileScroll(taskbarIconsContainer); // Chama a função atualizada
+    } else {
+        console.error('[taskbar] taskbarIconsContainer não foi inicializado corretamente.');
+    }
 
     console.log('[taskbar] Taskbar inicializada');
 }
@@ -49,154 +53,239 @@ function updateClock() { // Mantido igual
     console.log('[taskbar] Relógio inicializado');
 }
 
-/* 3. Start Menu Management - CORRIGIDO MOBILE/HOVER */
+/* 3. Start Menu Management - REFEITO */
 function initializeStartMenu() {
     const startButton = document.getElementById('start-button');
     const startMenu = document.getElementById('start-menu');
-    let activeSubmenu = null; // Guarda referência ao submenu ativo
+    let activeSubmenu = null; // Guarda referência ao submenu DOM element ativo
+    let menuTimeout = null; // Timeout para hover no desktop
 
-    // Abre/Fecha Menu Principal
+    // --- Event Listeners Principais ---
+    // Abrir/Fechar Menu Principal
     startButton.addEventListener('click', (e) => {
         e.stopPropagation();
         const isVisible = startMenu.style.display === 'block';
-        startMenu.style.display = isVisible ? 'none' : 'block';
-        // Se fechar o menu principal, esconde qualquer submenu ativo
-        if (isVisible && activeSubmenu) {
+        if (isVisible) {
+            closeAllMenus();
+        } else {
+            startMenu.style.display = 'flex'; // Usa flex para layout correto
+            startMenu.style.zIndex = '1002';
+        }
+    });
+
+    // Fechar tudo ao clicar fora
+    document.addEventListener('click', (e) => {
+        if (startMenu.style.display === 'flex' && !startButton.contains(e.target) && !startMenu.contains(e.target)) {
+            closeAllMenus();
+        }
+    });
+
+    // Função para fechar todos os menus
+    function closeAllMenus() {
+        startMenu.style.display = 'none';
+        if (activeSubmenu) {
             activeSubmenu.style.display = 'none';
             activeSubmenu = null;
         }
-        startMenu.style.zIndex = '1002';
-    });
+    }
 
-    // Fecha tudo ao clicar fora
-    document.addEventListener('click', (e) => {
-        if (startMenu.style.display === 'block' && !startButton.contains(e.target) && !startMenu.contains(e.target)) {
-            startMenu.style.display = 'none';
-            if (activeSubmenu) {
-                activeSubmenu.style.display = 'none';
-                activeSubmenu = null;
-            }
-        }
-    });
-
+    // --- Recriação do Conteúdo do Menu ---
     startMenu.innerHTML = ''; // Limpa
 
-    // Sidebar (será ajustada pelo CSS)
+    // Sidebar Vertical (Estilo via CSS)
     const sidebar = document.createElement('div');
     sidebar.className = 'menu-sidebar';
-    sidebar.textContent = 'Gaiat.OS 97';
+    const sidebarText = document.createElement('span');
+    sidebarText.className = 'menu-sidebar-text';
+    sidebarText.textContent = 'Gaiat.OS 97';
+    sidebar.appendChild(sidebarText);
     startMenu.appendChild(sidebar);
 
+    // Container Principal dos Itens
     const menuItemsContainer = document.createElement('div');
     menuItemsContainer.className = 'menu-items-container';
     startMenu.appendChild(menuItemsContainer);
 
-    // Função para criar itens e submenus
-    const createMenuItem = (text, iconSrc, submenuItems = null, action = null, isSeparator = false) => {
-        if (isSeparator) { /* ... cria separador ... */
-            const separator = document.createElement('div'); separator.className = 'menu-separator'; menuItemsContainer.appendChild(separator); return;
+    // --- Função Auxiliar para Criar Itens ---
+    const createMenuItem = (itemData, parentContainer) => {
+        // Cria Separador
+        if (itemData.separator) {
+            const separator = document.createElement('div');
+            separator.className = 'menu-separator';
+            parentContainer.appendChild(separator);
+            return;
         }
 
-        const item = document.createElement('div'); item.className = 'menu-item'; item.style.position = 'relative';
-        const icon = document.createElement('img'); icon.src = iconSrc; icon.style.width = '16px'; icon.style.height = '16px'; icon.style.marginRight = '8px'; item.appendChild(icon);
-        const textSpan = document.createElement('span'); textSpan.textContent = text; textSpan.style.flexGrow = 1; item.appendChild(textSpan);
+        // Cria Item Principal
+        const item = document.createElement('div');
+        item.className = 'menu-item';
 
-        if (submenuItems) { // Se tem submenu
-            const triangle = document.createElement('span'); triangle.className = 'submenu-triangle'; triangle.innerHTML = '▶'; item.appendChild(triangle);
+        const icon = document.createElement('img');
+        icon.src = itemData.icon || 'assets/icons/Programs.ico'; // Usa default se não houver
+        icon.style.width = '20px'; icon.style.height = '20px'; icon.style.marginRight = '8px';
+        item.appendChild(icon);
 
-            const submenu = document.createElement('div'); submenu.className = 'submenu'; submenu.style.display = 'none'; submenu.style.position = 'absolute'; submenu.style.zIndex = '1003';
-            // Adiciona o submenu ao container principal ANTES de popular, para cálculo de posição
-            menuItemsContainer.appendChild(submenu);
+        const textSpan = document.createElement('span');
+        textSpan.textContent = itemData.title;
+        item.appendChild(textSpan);
 
-            submenuItems.forEach(app => { // Popula o submenu
-                if (app.separator) { const sep = document.createElement('div'); sep.className = 'menu-separator'; submenu.appendChild(sep); return; }
-                const appItem = document.createElement('div'); appItem.className = 'menu-item';
-                const appIcon = document.createElement('img'); appIcon.src = app.icon; appIcon.style.width = '16px'; appIcon.style.height = '16px'; appIcon.style.marginRight = '8px'; appItem.appendChild(appIcon);
-                const appText = document.createElement('span'); appText.textContent = app.title; appItem.appendChild(appText);
-                appItem.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    console.log(`[taskbar] Clicado em ${app.id || app.title}`);
-                    if (app.action) app.action();
-                    startMenu.style.display = 'none'; submenu.style.display = 'none'; activeSubmenu = null; // Fecha tudo
-                });
-                submenu.appendChild(appItem);
-            });
+        // Se tem Submenu
+        if (itemData.submenu) {
+            const triangle = document.createElement('span');
+            triangle.className = 'submenu-triangle';
+            triangle.innerHTML = '▶';
+            item.appendChild(triangle);
 
-            // --- LÓGICA DE CLIQUE PARA SUBMENU (Substitui Hover) ---
+            const submenu = document.createElement('div');
+            submenu.className = 'submenu';
+            submenu.style.display = 'none'; // Começa escondido
+            submenu.style.position = 'absolute';
+            submenu.style.zIndex = '1003'; // Acima do menu pai
+
+            // Adiciona submenu ao container do menu principal para cálculo de pos correto
+            startMenu.appendChild(submenu);
+
+            // Cria itens do submenu recursivamente
+            itemData.submenu.forEach(subItemData => createMenuItem(subItemData, submenu));
+
+            // --- Lógica de Interação (Desktop: Hover | Mobile: Click) ---
+            const showSubmenu = () => {
+                clearTimeout(menuTimeout); // Cancela timeout de esconder anterior
+                if (activeSubmenu && activeSubmenu !== submenu) activeSubmenu.style.display = 'none';
+                if (submenu.style.display === 'block') return; // Já está visível
+
+                submenu.style.display = 'block';
+                activeSubmenu = submenu;
+
+                // Calcular Posição (separado para clareza)
+                positionSubmenu(submenu, item, startMenu);
+            };
+
+            const hideSubmenu = (delay = 150) => { // Esconde com um pequeno delay no desktop
+                 clearTimeout(menuTimeout);
+                 menuTimeout = setTimeout(() => {
+                     if (submenu.style.display === 'block' && !submenu.matches(':hover')) {
+                         submenu.style.display = 'none';
+                         if (activeSubmenu === submenu) activeSubmenu = null;
+                     }
+                 }, delay);
+            };
+
+            // Eventos Desktop (Hover)
+             item.addEventListener('mouseenter', showSubmenu);
+             item.addEventListener('mouseleave', () => hideSubmenu());
+             submenu.addEventListener('mouseenter', () => clearTimeout(menuTimeout));
+             submenu.addEventListener('mouseleave', () => hideSubmenu());
+
+             // Eventos Mobile/Click (Prioridade sobre hover se for touch)
+             item.addEventListener('click', (e) => {
+                 e.stopPropagation(); // Impede fechar menu principal
+                 if (submenu.style.display === 'block') {
+                     submenu.style.display = 'none';
+                     activeSubmenu = null;
+                 } else {
+                     showSubmenu();
+                 }
+             });
+
+        } else { // Item normal sem submenu
             item.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const isSubmenuVisible = submenu.style.display === 'block';
-
-                // Esconde o submenu ativo anteriormente (se for diferente deste)
-                if (activeSubmenu && activeSubmenu !== submenu) {
-                    activeSubmenu.style.display = 'none';
-                }
-
-                // Mostra ou esconde o submenu atual
-                submenu.style.display = isSubmenuVisible ? 'none' : 'block';
-                activeSubmenu = isSubmenuVisible ? null : submenu; // Atualiza referência ativa
-
-                if (!isSubmenuVisible) { // Se acabou de mostrar, calcula posição
-                    const itemRect = item.getBoundingClientRect();
-                    const menuRect = startMenu.getBoundingClientRect();
-                    const screenWidth = window.innerWidth;
-                    const screenHeight = window.innerHeight;
-                    const taskbarHeight = 32;
-
-                    // Posição padrão: à direita do item
-                    let targetLeft = menuRect.left + itemRect.width;
-                    let targetTop = itemRect.top;
-
-                    // Precisa calcular dimensões DEPOIS de tornar visível
-                    const subRect = submenu.getBoundingClientRect();
-
-                    // Verifica se cabe na direita, senão tenta esquerda
-                    if (targetLeft + subRect.width > screenWidth) {
-                        targetLeft = menuRect.left - subRect.width;
-                    }
-                    // Garante que não vá para fora à esquerda
-                     if (targetLeft < 0) targetLeft = 0;
-
-                    // Verifica se cabe embaixo, senão tenta alinhar acima
-                    if (targetTop + subRect.height > screenHeight - taskbarHeight) {
-                        targetTop = itemRect.bottom - subRect.height;
-                    }
-                    // Garante que não vá para fora acima
-                     if (targetTop < 0) targetTop = 0;
-
-                    submenu.style.left = `${targetLeft - menuRect.left}px`; // Relativo ao startMenu
-                    submenu.style.top = `${targetTop - menuRect.top}px`;   // Relativo ao startMenu
-                }
+                console.log(`[taskbar] Clicado em ${itemData.title}`);
+                if (itemData.action) itemData.action();
+                closeAllMenus(); 
             });
-
-        } else { // Item normal (sem submenu)
-            item.addEventListener('click', (e) => {
-                e.stopPropagation();
-                console.log(`[taskbar] Clicado em ${text}`);
-                if (action) action();
-                startMenu.style.display = 'none'; // Fecha menu principal
-                if (activeSubmenu) { activeSubmenu.style.display = 'none'; activeSubmenu = null; } // Fecha submenu se houver
-            });
+            // Adiciona listener para fechar submenu se mouse sair para item sem submenu
+             item.addEventListener('mouseenter', () => {
+                 if(activeSubmenu) {
+                     hideSubmenu(50);
+                 }
+             });
         }
-        menuItemsContainer.appendChild(item); // Adiciona item principal
+        parentContainer.appendChild(item);
     };
 
-    // --- Define a Estrutura do Menu ---
-    createMenuItem('Programas', 'assets/icons/Programs.ico', [
-        { ...window.appConfig['benji'], action: () => openWindow('benji') }, { separator: true },
-        { ...window.appConfig['poligonal'], action: () => openWindow('poligonal') }, // Placeholders agora abrem alerta via openWindow
-        { ...window.appConfig['gaiato'], action: () => openWindow('gaiato') }
-    ]);
-    createMenuItem('Acessórios', 'assets/icons/acessorios.ico', [
-        { ...window.appConfig['notepad'], action: () => openWindow('notepad') },
-        { ...window.appConfig['pinto'], action: () => openWindow('pinto') }
-    ]);
-    createMenuItem('', '', null, null, true); // Separador
-    createMenuItem('Configurações', 'assets/icons/configs.ico', null, () => openWindow('system-properties'));
-    createMenuItem('Ajuda', 'assets/icons/ajuda.ico', null, () => openWindow('help'));
-    createMenuItem('', '', null, null, true); // Separador
-    createMenuItem('Desligar...', 'assets/icons/desligar.ico', null, () => openWindow('shutdown'));
-}
+     // --- Função para Posicionar Submenu ---
+     function positionSubmenu(submenu, parentItem, mainMenu) {
+         const menuRect = mainMenu.getBoundingClientRect();
+         const itemRect = parentItem.getBoundingClientRect();
+         const isMobile = window.innerWidth <= 768;
+
+         // Reseta estilos de posicionamento
+         submenu.style.left = ''; submenu.style.top = ''; submenu.style.bottom = '';
+         submenu.style.width = ''; submenu.style.height = ''; submenu.style.maxHeight = '';
+         submenu.style.overflowY = 'visible';
+
+         const subRect = submenu.getBoundingClientRect();
+
+         if (isMobile) {
+             // MOBILE: Overlay no topo do menu principal
+             submenu.style.left = '0px';
+             submenu.style.top = '0px';
+             submenu.style.width = `${menuRect.width}px`;
+             submenu.style.height = 'auto';
+             submenu.style.maxHeight = `${menuRect.height}px`;
+             submenu.style.overflowY = 'auto';
+         } else {
+             // DESKTOP: Posiciona ao lado
+             let targetLeft = menuRect.left + menuRect.width;
+             let targetTop = itemRect.top;
+             if (targetLeft + subRect.width > window.innerWidth) targetLeft = menuRect.left - subRect.width;
+             if (targetLeft < 0) targetLeft = menuRect.left + menuRect.width;
+             if (targetTop + subRect.height > window.innerHeight - 32) targetTop = itemRect.bottom - subRect.height;
+             if (targetTop < 0) targetTop = 0;
+             submenu.style.left = `${targetLeft - menuRect.left}px`;
+             submenu.style.top = `${targetTop - menuRect.top}px`;
+             submenu.style.width = 'auto';
+             submenu.style.height = 'auto';
+         }
+     }
+
+
+    // --- Definir Itens do Menu (Estrutura de Dados) ---
+    const menuStructure = [
+        {
+            title: 'Programas', icon: 'assets/icons/Programs.ico', submenu: [
+                { id: 'benji' },
+                { separator: true },
+                { id: 'poligonal' },
+                { id: 'gaiato' }
+            ]
+        },
+        {
+            title: 'Acessórios', icon: 'assets/icons/acessorios.ico', submenu: [
+                { id: 'notepad' },
+                { id: 'pinto' }
+                // { title: 'Calculadora', icon: '...', action: () => openWindow('calculator') }
+            ]
+        },
+        { separator: true },
+        { id: 'system-properties' },
+        { id: 'help' },
+        { separator: true },
+        { id: 'shutdown' }
+    ];
+
+    // Função para popular menu a partir da estrutura e appConfig
+    function populateMenu(items, container) {
+        items.forEach(itemData => {
+            if (itemData.separator) {
+                createMenuItem({ separator: true }, container);
+            } else {
+                // Pega dados do appConfig se tiver ID, senão usa dados diretos
+                const config = itemData.id ? window.appConfig[itemData.id] : {};
+                const title = itemData.title || config.title || itemData.id; // Ordem de prioridade
+                const icon = itemData.icon || config.icon || 'assets/icons/Programs.ico';
+                const action = itemData.action || (itemData.id ? () => openWindow(itemData.id) : null);
+                const subItems = itemData.submenu; // Submenu é definido na estrutura principal
+
+                createMenuItem({ title, icon, submenu: subItems, action }, container);
+            }
+        });
+    }
+
+    populateMenu(menuStructure, menuItemsContainer); // Cria o menu
+    console.log('[taskbar] Menu Iniciar recriado.');
 
 
 /* 4. Taskbar Icons Management */
@@ -211,7 +300,7 @@ window.addTaskbarIcon = function(windowId, appName, appSettings) { // Mantido ig
     taskbarIconsContainer.appendChild(taskIcon); windowManager.windows[windowId].taskIcon = taskIcon;
 };
 
-/* 5. Mobile Scroll Utility - CORRIGIDO CURSOR */
+/* 5. Mobile Scroll Utility */
 function setupMobileScroll(scrollContainer) {
      let isDragging = false; let startX, scrollLeft;
      const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
@@ -220,7 +309,6 @@ function setupMobileScroll(scrollContainer) {
          isDragging = true;
          startX = (e.pageX || e.touches[0].pageX) - scrollContainer.offsetLeft;
          scrollLeft = scrollContainer.scrollLeft;
-         // Aplica cursor grabbing APENAS se NÃO for touch (ou seja, mouse drag)
          if (!isTouchDevice) {
             scrollContainer.style.cursor = 'grabbing';
          }
@@ -229,7 +317,6 @@ function setupMobileScroll(scrollContainer) {
      const stopDrag = () => {
          if (!isDragging) return;
          isDragging = false;
-          // Restaura cursor padrão APENAS se NÃO for touch
          if (!isTouchDevice) {
              scrollContainer.style.cursor = 'grab';
          }
@@ -237,16 +324,16 @@ function setupMobileScroll(scrollContainer) {
      };
      const doDrag = (e) => {
          if (!isDragging) return;
-         e.preventDefault(); // Previne scroll da página se estiver arrastando a taskbar
+         e.preventDefault(); 
          const x = (e.pageX || e.touches[0].pageX) - scrollContainer.offsetLeft;
-         const walk = (x - startX) * 1.5; // Sensibilidade
+         const walk = (x - startX) * 1.5;
          scrollContainer.scrollLeft = scrollLeft - walk;
      };
 
      // Adiciona listeners de mouse
      scrollContainer.addEventListener('mousedown', startDrag);
      scrollContainer.addEventListener('mouseup', stopDrag);
-     scrollContainer.addEventListener('mouseleave', stopDrag); // Para drag do mouse sair
+     scrollContainer.addEventListener('mouseleave', stopDrag);
      scrollContainer.addEventListener('mousemove', doDrag);
 
      // Adiciona listeners de toque SE for dispositivo touch
@@ -261,4 +348,5 @@ function setupMobileScroll(scrollContainer) {
       if (!isTouchDevice) {
           scrollContainer.style.cursor = 'grab';
       }
- }
+    }
+}
