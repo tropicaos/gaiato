@@ -13,7 +13,7 @@ const desktopManager = {
         { id: 'benji', name: 'BENJI', icon: 'assets/icons/plushbear.ico', row: 0, col: 0, action: () => openWindow('benji') },
         { id: 'poligonal', name: 'Poligonal', icon: 'assets/icons/poligonal.ico', row: 1, col: 0, action: () => openWindow('poligonal') }, // Placeholder
         { id: 'gaiato', name: 'Gaiato', icon: 'assets/icons/gaiato.ico', row: 2, col: 0, action: () => openWindow('gaiato') },       // Placeholder
-        { id: 'notepad', name: 'Bloquinho', icon: 'assets/icons/notepad.ico', row: 3, col: 0, action: () => openWindow('notepad') }
+        { id: 'notepad', name: 'Bloquinho', icon: 'assets/icons/Notepad.ico', row: 3, col: 0, action: () => openWindow('notepad') }
         // { id: 'pinto', name: 'Pinto', icon: 'assets/icons/paint.ico', row: 0, col: 1, action: () => openWindow('pinto') } // Exemplo de outro ícone
     ],
 

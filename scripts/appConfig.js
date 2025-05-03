@@ -24,7 +24,7 @@ window.appConfig = {
     },
     'notepad': {
         title: 'Bloquinho',
-        icon: 'assets/icons/notepad.ico',
+        icon: 'assets/icons/Notepad.ico',
         allowMultipleInstances: true,
         resizable: true
     },
