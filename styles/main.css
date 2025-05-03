@@ -13,8 +13,8 @@
 /* 1. Global Styles */
 body {
   margin: 0;
-  background: #008080; /* Desktop background color */
-  overflow: hidden; /* Prevent body scrolling */
+  background: #008080;
+  overflow: hidden;
 }
 
 /* 2. Desktop Styles */
@@ -46,90 +46,87 @@ body {
 #clock { box-shadow: var(--border-sunken-inner, inset -1px -1px #dfdfdf, inset 1px 1px #808080); border: none; padding: 2px 5px; margin-left: 4px; flex-shrink: 0; font-size: 11px; display: flex; align-items: center; height: 22px; min-width: 50px; text-align: center; }
 #clock .time-display { margin-right: 5px; }
 
-/* 5. Start Menu Styles - CORRIGIDO LAYOUT SIDEBAR */
+/* Adicionado para zoom mobile */
+body {
+  margin: 0;
+  background: #008080;
+  overflow: hidden;
+  touch-action: manipulation; /* Impede zoom por duplo toque */
+  -webkit-user-select: none; /* Impede seleção de texto */
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /* Base font set by 98.css */
+}
+
+
+/* 5. Start Menu Styles - LAYOUT CORRIGIDO */
 #start-menu {
   position: absolute; bottom: 34px; left: 2px;
-  width: 200px; /* Largura fixa inicial */
+  width: 220px; /* Aumentei um pouco a largura */
   background: var(--surface, #c0c0c0);
   border: var(--border-width, 1px) solid;
   border-color: var(--button-highlight, #ffffff) var(--button-shadow, #808080) var(--button-shadow, #808080) var(--button-highlight, #ffffff);
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   display: none; /* Começa escondido */
   z-index: 1002;
-  /* Flex row por padrão, alinha itens para esticar na altura */
+  /* Flex row e align stretch SÃO ESSENCIAIS */
   display: flex;
   flex-direction: row;
-  align-items: stretch; /* Faz sidebar e container esticarem */
+  align-items: stretch;
+  min-height: 150px;
+  max-height: calc(100vh - 50px);
 }
 
 .menu-sidebar {
   width: 25px; /* Largura fixa */
-  background: var(--dialog-gray, #808080);
+  background: linear-gradient(to bottom, var(--dialog-blue, #000080), #0000A0 80%, var(--dialog-blue-light, #1084d0)); /* Degradê */
   color: var(--button-highlight, #ffffff);
-  /* Tenta manter texto vertical */
-  writing-mode: vertical-lr; /* Ou vertical-rl dependendo da rotação desejada */
+  writing-mode: vertical-lr; /* Texto vertical */
   text-orientation: mixed;
-  /* Removido transform rotate */
   display: flex;
-  align-items: center; /* Centraliza conteúdo (texto) */
+  align-items: center;
   justify-content: center;
-  font-size: 14px; /* Aumenta um pouco */
+  font-size: 14px;
   font-weight: bold;
   text-shadow: 1px 1px #000;
   flex-shrink: 0; /* Não encolhe */
-  /* Borda Raised à direita */
+  /* Borda raised à direita */
   border-right: var(--border-width, 1px) solid var(--button-shadow, #808080);
   box-shadow: inset -1px 0 0 var(--button-highlight, #ffffff);
-  padding: 5px 0; /* Espaçamento vertical interno */
-  text-align: center; /* Garante centralização do texto */
+  padding: 5px 0;
+  text-align: center;
+  /* align-self: stretch; é herdado */
 }
 
 .menu-items-container {
-  flex-grow: 1; /* Ocupa o resto do espaço */
+  flex-grow: 1; /* Ocupa o resto */
   display: flex;
   flex-direction: column;
-  padding: 2px; /* Pequeno padding interno */
-  overflow-y: auto; /* Adiciona scroll se itens não couberem */
-  max-height: calc(100vh - 100px); /* Limita altura máxima */
+  padding: 2px;
+  overflow-y: auto;
 }
 
 .menu-item {
-  padding: 4px 8px 4px 4px; /* Ajusta padding */
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  color: var(--text-color, #222222);
-  min-height: 22px;
-  white-space: nowrap; /* Impede quebra de linha do texto */
+  padding: 4px 8px 4px 4px; display: flex; align-items: center; cursor: pointer;
+  color: var(--text-color, #222222); min-height: 22px; white-space: nowrap;
 }
-.menu-item img { flex-shrink: 0; } /* Ícone não encolhe */
-.menu-item span { flex-grow: 1; overflow: hidden; text-overflow: ellipsis; } /* Texto cresce e usa ellipsis */
-.menu-item .submenu-triangle { margin-left: auto; font-size: 8px; padding-left: 5px; } /* Triângulo à direita */
-
-.menu-item:hover { /* Estilo hover mantido */
-  background: var(--dialog-blue, #000080);
-  color: var(--button-highlight, #ffffff);
-}
+.menu-item img { flex-shrink: 0; width: 16px; height: 16px; margin-right: 8px; }
+.menu-item span { flex-grow: 1; overflow: hidden; text-overflow: ellipsis; }
+.menu-item .submenu-triangle { margin-left: auto; font-size: 8px; padding-left: 5px; }
+.menu-item:hover { background: var(--dialog-blue, #000080); color: var(--button-highlight, #ffffff); }
 
 .submenu {
-  min-width: 180px; width: auto; /* Largura automática */
-  background: var(--surface, #c0c0c0);
-  border: var(--border-width, 1px) solid;
+  min-width: 180px; width: auto;
+  background: var(--surface, #c0c0c0); border: var(--border-width, 1px) solid;
   border-color: var(--button-highlight, #ffffff) var(--button-shadow, #808080) var(--button-shadow, #808080) var(--button-highlight, #ffffff);
   z-index: 1003; position: absolute; box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  padding: 2px; display: none;
-  /* Estilos 'left' e 'top' são definidos via JS agora */
-  /* Adiciona 'bottom' para posicionamento alternativo */
-  bottom: auto;
+  padding: 2px; display: none; max-height: calc(100vh - 50px); overflow-y: auto; bottom: auto;
 }
 .submenu .menu-item { min-height: 22px; }
 
-.menu-separator { /* Estilo para separadores */
-  height: 2px;
-  border-top: 1px solid var(--button-shadow, #808080);
-  border-bottom: 1px solid var(--button-highlight, #ffffff);
-  margin: 2px 0;
-  padding: 0;
+.menu-separator {
+  height: 2px; border-top: 1px solid var(--button-shadow, #808080); border-bottom: 1px solid var(--button-highlight, #ffffff); margin: 2px 0; padding: 0;
 }
 
 
